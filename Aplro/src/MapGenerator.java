@@ -2,6 +2,7 @@ import java.util.Random;
 
 public class MapGenerator {
     private int size;
+    private double wallDensity;
     private Random random;
     
     // Constants for map values
@@ -11,7 +12,12 @@ public class MapGenerator {
     public static final int END = 3;
     
     public MapGenerator(int size) {
+        this(size, 0.3); // Default wall density of 30%
+    }
+    
+    public MapGenerator(int size, double wallDensity) {
         this.size = size;
+        this.wallDensity = wallDensity;
         this.random = new Random();
     }
     
@@ -28,7 +34,7 @@ public class MapGenerator {
                 } 
                 // Fill internal area with random content
                 else {
-                    map[i][j] = (random.nextDouble() < 0.3) ? WALL : EMPTY;
+                    map[i][j] = (random.nextDouble() < wallDensity) ? WALL : EMPTY;
                 }
             }
         }

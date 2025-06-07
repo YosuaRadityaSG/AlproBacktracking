@@ -46,7 +46,7 @@ public class App {
     }
     
     private static void printMap(int[][] map) {
-        String[] symbols = {"□ ", "■ ", "S ", "E ", "× "};
+        String[] symbols = {"  ", "■ ", "S ", "E ", "* "};
         
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {

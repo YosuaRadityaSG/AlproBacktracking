@@ -2,6 +2,7 @@
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.FlowLayout;
+import java.util.List;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -15,6 +16,7 @@ public class Layar extends JPanel{
     private JTextField sizeField;
     private JTextArea output;
     private JPanel mapPanel, centerPanel;
+    private JLabel timeLabel;
 
     public Layar(){
         setLayout(new BorderLayout());
@@ -40,12 +42,18 @@ public class Layar extends JPanel{
         output = new JTextArea(18, 40);
         output.setEditable(false);
         output.setBorder(new EmptyBorder(0, 10, 0, 0));
-        mapPanel = new Map();
+        mapPanel = new BacktrackMap();
         JScrollPane scrollPane = new JScrollPane(output);
 
         centerPanel = new JPanel(new CardLayout());
         centerPanel.add(scrollPane, "TEXT");
-        centerPanel.add(mapPanel, "MAP");
+        timeLabel = new JLabel("");
+        JPanel timePanel = new JPanel(new BorderLayout());
+
+        timePanel.setBorder(new EmptyBorder(0, 10, 10, 0));
+        timePanel.add(mapPanel, BorderLayout.CENTER);
+        timePanel.add(timeLabel, BorderLayout.SOUTH);
+        centerPanel.add(timePanel, "MAP");
         add(panelContainer, BorderLayout.NORTH);
         add(centerPanel, BorderLayout.CENTER);
         button.addActionListener(e -> onGenerate());
@@ -74,8 +82,22 @@ public class Layar extends JPanel{
         output.append("Map generated with borders:\n");
         switch (size) {
             case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-                ((Map) mapPanel).setMap(map, size);
+                ((BacktrackMap) mapPanel).setMap(map, size);
                 ((CardLayout) centerPanel.getLayout()).show(centerPanel, "MAP");
+                List<int[]> path = ((BacktrackMap) mapPanel).findPathBacktrack();
+
+                if (path == null || path.isEmpty()) {
+                    timeLabel.setText("No path exists.\n");
+                    return;
+                }
+                int time = ((BacktrackMap) mapPanel).getPathTime(path);
+
+                ((BacktrackMap) mapPanel).animatePath(path, time, () -> {
+                    javax.swing.SwingUtilities.invokeLater(() -> {
+                        double seconds = path.size() * 0.3;
+                        timeLabel.setText("Time: " + String.format("%.1f", seconds) + " seconds.\n");
+                    });
+                });
                 break;
             default:
                 mapPanel.setVisible(false);

@@ -94,6 +94,7 @@ public class Backtracking {
         if (!pathStack.isEmpty()) pathStack.pop();
         return false;
     }
+    
     private void removeLastNStarPositions(int n) {
         try {
             Field field = mapPanel.getClass().getDeclaredField("starPathPositions");

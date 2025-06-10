@@ -57,7 +57,6 @@ public class Layar extends JPanel{
             return;
         }
         output.append("Generating map...\n");
-        
         output.append("Map generated with borders:\n");
         switch (size) {
             case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
@@ -69,9 +68,9 @@ public class Layar extends JPanel{
                 int mapSize = size * 40;
                 
                 mapPanel.setPreferredSize(new Dimension(mapSize, mapSize));
+                mapPanel.setBackground(new Color(173, 216, 230));
                 mapScrollPane = new JScrollPane(mapPanel);
                 mapScrollPane.setBounds(6,105, 610, 610);
-                mapPanel.setBackground(new Color(173, 216, 230));
                 add(mapScrollPane);
                 revalidate();
                 repaint();
@@ -84,9 +83,9 @@ public class Layar extends JPanel{
 
                         javax.swing.SwingUtilities.invokeLater(() -> {
                             if (found) {
-                                System.out.println("Time: " + time + " seconds.");
+                                output.append("Time: " + time + " seconds.\n");
                             } else {
-                                System.out.println("No path exists.");
+                                output.append("No path exists.\n");
                             }
                         });
                     } catch (InterruptedException e) {

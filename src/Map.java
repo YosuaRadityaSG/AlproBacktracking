@@ -24,8 +24,10 @@ public class Map extends JPanel{
     public static final int JINXBLOCK = 7;
     private List<int[]> starPathPositions = new ArrayList<>();
 
-    public Map(int size){
+    public Map(int size, long seed) {
         this.size = size;
+        this.random = new Random(seed);
+        
         try{
             windImage = ImageIO.read(new File("Aplro/Asset/Angin.png"));
             portal1Image = ImageIO.read(new File("Aplro/Asset/Portal1.png"));
@@ -66,8 +68,8 @@ public class Map extends JPanel{
                 }
             }
         }
-        
         int[] assets;
+        
         if (size == 3) {
             assets = new int[] {1, 4};
         } else {
@@ -94,7 +96,7 @@ public class Map extends JPanel{
                 if (i == 0 || j == 0 || i == size + 1 || j == size + 1) {
                     data[i][j] = WALL;
                 } else {
-                    data[i][j] = (new Random().nextDouble() < 0.03) ? WALL : EMPTY;
+                    data[i][j] = (random.nextDouble() < 0.03) ? WALL : EMPTY;
                 }
             }
         }
@@ -134,6 +136,10 @@ public class Map extends JPanel{
 
     public int[][] getInternalMap() {
         return map;
+    }
+
+    public List<int[]> getStarPathPositions() {
+        return new ArrayList<>(starPathPositions);
     }
 
     @Override

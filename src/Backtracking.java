@@ -50,14 +50,17 @@ public class Backtracking {
     }
 
     public boolean solveWithAnimation() {
+        boolean result = false;
+
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (map[i][j] == Map.START) {
-                    return findPath(i, j);
+                    result = findPath(i, j);
+                    break;
                 }
             }
         }
-        return false;
+        return result;
     }
 
     private boolean findPath(int row, int col) {
@@ -201,9 +204,5 @@ public class Backtracking {
 
     public int getStepsCount() {
         return ctr;
-    }
-
-    public double getTime(){
-        return (ctr * 150L) / 1000.0;
     }
 }

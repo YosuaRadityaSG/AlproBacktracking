@@ -96,7 +96,7 @@ public class Map extends JPanel{
                 if (i == 0 || j == 0 || i == size + 1 || j == size + 1) {
                     data[i][j] = WALL;
                 } else {
-                    data[i][j] = (random.nextDouble() < 0.03) ? WALL : EMPTY;
+                    data[i][j] = (random.nextDouble() < 0.1) ? WALL : EMPTY;
                 }
             }
         }
@@ -140,6 +140,18 @@ public class Map extends JPanel{
 
     public List<int[]> getStarPathPositions() {
         return new ArrayList<>(starPathPositions);
+    }
+
+    public void clearPath() {
+        getStarPathPositions().clear();
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[i].length; j++) {
+                if (map[i][j] == 4) {
+                    map[i][j] = 0;
+                }
+            }
+        }
+        repaint();
     }
 
     @Override

@@ -67,6 +67,8 @@ public class Backtracking {
         if (!isValid(row, col)) {
             return false;
         }
+        boolean isJinxBlock = isJinxBlock(row, col);
+        
         if (map[row][col] == Map.END) {
             mapPanel.addStarPathPosition(row, col);
             pathStack.push(new int[]{row, col});
@@ -81,7 +83,11 @@ public class Backtracking {
         ctr++;
         mapPanel.repaint();
         try {
-            Thread.sleep(150);
+            if (isJinxBlock) {
+                Thread.sleep(2000);
+            } else {
+                Thread.sleep(150);
+            }
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -196,6 +202,13 @@ public class Backtracking {
             }
         }
         return true;
+    }
+
+    private boolean isJinxBlock(int row, int col) {
+        int[][] internalMap = mapPanel.getInternalMap();
+        return row >= 0 && row < internalMap.length && 
+               col >= 0 && col < internalMap[0].length && 
+               internalMap[row][col] == 4;
     }
 
     public int[][] getSolutionPath() {

@@ -15,7 +15,7 @@ public class Layar extends JPanel {
     private JTextArea output;
     private JScrollPane scrollPane, mapScrollPane, solutionMapScrollPane;
     private Map mapPanel, solutionMapPanel;
-    private JLabel timerLabel;
+    private JLabel backtrackingTimerLabel, solutionTimerLabel;
     private long startTime;
     private boolean timerRunning;
     private double jinxBlock = 0;
@@ -37,10 +37,14 @@ public class Layar extends JPanel {
 
         button.setBounds(10, 35, 150, 30);
         add(button);
-        timerLabel = new JLabel("");
-        timerLabel.setBounds(535, 70, 100, 40);
-        add(timerLabel);
-        timerLabel.setVisible(false);
+        backtrackingTimerLabel = new JLabel("");
+        backtrackingTimerLabel.setBounds(535, 70, 100, 40);
+        add(backtrackingTimerLabel);
+        backtrackingTimerLabel.setVisible(false);
+        solutionTimerLabel = new JLabel("");
+        solutionTimerLabel.setBounds(1145, 70, 100, 40);
+        solutionTimerLabel.setVisible(false);
+        add(solutionTimerLabel);
         output = new JTextArea();
         output.setEditable(false);
         output.setMargin(new Insets(0, 10, 0, 0));
@@ -70,6 +74,14 @@ public class Layar extends JPanel {
         output.append("Map generated with borders:\n");
         switch (size) {
             case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
+                if (mapPanel != null) {
+                    mapPanel.clearPath();
+                    mapPanel.repaint();
+                }
+                if (solutionMapPanel != null) {
+                    solutionMapPanel.clearPath();
+                    solutionMapPanel.repaint();
+                }
                 if (mapScrollPane != null) {
                     remove(mapScrollPane);
                     mapScrollPane = null;
@@ -97,8 +109,10 @@ public class Layar extends JPanel {
                 startTime = System.currentTimeMillis();
                 timerRunning = true;
                 jinxBlock = 0;
-                timerLabel.setText("");
-                timerLabel.setVisible(true);
+                backtrackingTimerLabel.setText("");
+                backtrackingTimerLabel.setVisible(true);
+                solutionTimerLabel.setText("");
+                solutionTimerLabel.setVisible(false);
                 startTimer();
                 
                 new Thread(() -> {
@@ -106,15 +120,44 @@ public class Layar extends JPanel {
                         Thread.sleep(500);
                         startJinxBlockDetector();
                         Backtracking backtracking = new Backtracking(mapPanel, mapPanel.getStarImage());
-                        boolean found = backtracking.solveWithAnimation();
+                        boolean backtrackingFound = backtracking.solveWithAnimation();
                         
                         stopTimer();
+                        double backtrackingTime = (System.currentTimeMillis() - startTime) / 1000.0 + jinxBlock;
                         
                         SwingUtilities.invokeLater(() -> {
-                            double finalTime = (System.currentTimeMillis() - startTime) / 1000.0 + jinxBlock;
-
-                            timerLabel.setText("Timer: " + String.format("%.2f", finalTime) + "s");
+                            backtrackingTimerLabel.setText("Timer: " + String.format("%.2f", backtrackingTime) + "s");
+                            solutionTimerLabel.setVisible(true);
                         });
+                        Thread.sleep(500);
+                        startTime = System.currentTimeMillis();
+                        jinxBlock = 0;
+                        timerRunning = true;
+                        Thread timerThread = new Thread(() -> {
+                            try {
+                                while (timerRunning) {
+                                    Thread.sleep(10);
+                                    final double elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0 + jinxBlock;
+                                    
+                                    SwingUtilities.invokeLater(() -> {
+                                        solutionTimerLabel.setText("Timer: " + String.format("%.2f", elapsedTime) + "s");
+                                    });
+                                }
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        });
+                        timerThread.start();
+                        Solution solution = new Solution(solutionMapPanel, solutionMapPanel.getStarImage());
+                        boolean solutionFound = solution.solveWithAnimation();
+                        
+                        timerRunning = false;
+                        double solutionTime = solution.getTime();
+                        
+                        SwingUtilities.invokeLater(() -> {
+                            solutionTimerLabel.setText("Timer: " + String.format("%.2f", solutionTime) + "s");
+                        });
+                        
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -122,7 +165,7 @@ public class Layar extends JPanel {
                 break;
                 
             default:
-                timerLabel.setVisible(false);
+                backtrackingTimerLabel.setVisible(false);
                 if (scrollPane.getParent() == null) {
                     add(scrollPane);
                 }
@@ -166,7 +209,7 @@ public class Layar extends JPanel {
                                 pos[1] >= 0 && pos[1] < internalMap[0].length &&
                                 internalMap[pos[0]][pos[1]] == 4) {
                                 jinxBlock += 4.0;
-                                Thread.sleep(300);
+                                Thread.sleep(2000);
                             }
                             lastPathSize = path.size();
                         }
@@ -190,7 +233,7 @@ public class Layar extends JPanel {
                     final double elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0 + jinxBlock;
                     
                     SwingUtilities.invokeLater(() -> {
-                        timerLabel.setText("Timer: " + String.format("%.2f", elapsedTime) + "s");
+                        backtrackingTimerLabel.setText("Timer: " + String.format("%.2f", elapsedTime) + "s");
                     });
                 } catch (InterruptedException e) {
                     e.printStackTrace();

@@ -1,4 +1,5 @@
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Insets;
 import javax.swing.JButton;
@@ -16,23 +17,27 @@ public class Layar extends JPanel{
 
     public Layar(){
         setLayout(null);
+        setBackground(new Color(173, 216, 230));
         mapScrollPane = null;
         JLabel label = new JLabel("Map size (1-15): ");
 
         label.setBounds(10, 0, 100, 40);
+        label.setBackground(new Color(173, 216, 230));
         add(label);
         sizeField = new JTextField(2);
         sizeField.setBounds(105, 10, 30, 20);
         add(sizeField);
         JButton button = new JButton("Generate and Solve");
 
-        button.setBounds(10, 30, 150, 25);
+        button.setBounds(10, 35, 150, 30);
         add(button);
         output = new JTextArea();
         output.setEditable(false);
         output.setMargin(new Insets(0, 10, 0, 0));
+        output.setBackground(new Color(173, 216, 230));
         scrollPane = new JScrollPane(output);
-        scrollPane.setBounds(0, 60, 1285, 1000);
+        scrollPane.setBounds(0, 70, 1285, 1000);
+        scrollPane.getViewport().setBackground(new Color(173, 216, 230));
         add(scrollPane);
         button.addActionListener(e -> onGenerate());
     }
@@ -65,7 +70,8 @@ public class Layar extends JPanel{
                 
                 mapPanel.setPreferredSize(new Dimension(mapSize, mapSize));
                 mapScrollPane = new JScrollPane(mapPanel);
-                mapScrollPane.setBounds(10, 60, 685, 685);
+                mapScrollPane.setBounds(6,105, 610, 610);
+                mapPanel.setBackground(new Color(173, 216, 230));
                 add(mapScrollPane);
                 revalidate();
                 repaint();

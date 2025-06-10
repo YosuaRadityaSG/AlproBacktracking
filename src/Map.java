@@ -39,7 +39,7 @@ public class Map extends JPanel{
         }
         loadImage(size);
         mapGenerator = mapGenerator();
-        AssetsGenerator();
+        randomAssetsGenerator();
         repaint();
     }
 
@@ -52,7 +52,7 @@ public class Map extends JPanel{
         }
     }
 
-    private void AssetsGenerator(){
+    public void randomAssetsGenerator(){
         map = new int[size][size];
         List<Integer> positions = new ArrayList<>();
         
@@ -66,8 +66,8 @@ public class Map extends JPanel{
                 }
             }
         }
+        
         int[] assets;
-
         if (size == 3) {
             assets = new int[] {1, 4};
         } else {
@@ -75,14 +75,13 @@ public class Map extends JPanel{
         }
 
         for (int assetType : assets) {
-            if(positions.size() == 0){
+            if (positions.isEmpty()) {
                 break;
             }
             int index = random.nextInt(positions.size()), pos = positions.get(index);
-
             positions.remove(index);
-
             int row = pos / size, col = pos % size;
+
             map[row][col] = assetType;
         }
     }
@@ -133,6 +132,10 @@ public class Map extends JPanel{
         repaint();
     }
 
+    public int[][] getInternalMap() {
+        return map;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -143,7 +146,7 @@ public class Map extends JPanel{
         
         g.drawImage(mapImage, x, y, this);
         if (map == null) {
-            AssetsGenerator();
+            randomAssetsGenerator();
         }
         int cellSize = mapImage.getWidth() / size;
 

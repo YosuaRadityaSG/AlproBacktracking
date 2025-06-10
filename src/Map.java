@@ -1,4 +1,3 @@
-
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,7 +10,7 @@ import javax.swing.JPanel;
 
 public class Map extends JPanel{
     private int size;
-    private BufferedImage mapImage, windImage, portal1Image, portal2Image, jinxBlockImage, treeImage, starImage;
+    private BufferedImage mapImage, windImage, portal1Image, portal2Image, jinxBlockImage, starImage, wallImage;
     private int[][] map;
     private int[][] mapGenerator;
     private Random random = new Random();
@@ -19,6 +18,10 @@ public class Map extends JPanel{
     public static final int WALL = 1;
     public static final int START = 2;
     public static final int END = 3;
+    public static final int ANGIN = 4;
+    public static final int PORTAL1 = 5;
+    public static final int PORTAL2 = 6;
+    public static final int JINXBLOCK = 7;
     private List<int[]> starPathPositions = new ArrayList<>();
 
     public Map(int size){
@@ -28,8 +31,8 @@ public class Map extends JPanel{
             portal1Image = ImageIO.read(new File("Aplro/Asset/Portal1.png"));
             portal2Image = ImageIO.read(new File("Aplro/Asset/Portal2.png"));
             jinxBlockImage = ImageIO.read(new File("Aplro/Asset/JinxBlock.png"));
-            treeImage = ImageIO.read(new File("Aplro/Asset/Pohon.png"));
             starImage = ImageIO.read(new File("Aplro/Asset/Bintang.png"));
+            wallImage = ImageIO.read(new File("Aplro/Asset/Wall.png"));
         }catch(IOException e){
             System.out.println("Error loading images: " + e.getMessage());
             e.printStackTrace();
@@ -42,7 +45,7 @@ public class Map extends JPanel{
 
     private void loadImage(int size) {
         try {
-            mapImage = ImageIO.read(new File("Aplro/Asset/map_" + size + "x" + size + "_gray.png"));
+            mapImage = ImageIO.read(new File("Aplro/Asset/map_" + size + "x" + size + "_noborder.png"));
         } catch (IOException e) {
             System.out.println("Error loading image: " + e.getMessage());
             e.printStackTrace();
@@ -58,7 +61,8 @@ public class Map extends JPanel{
                 int mapRow = i + 1, mapCol = j + 1, cellValue = mapGenerator[mapRow][mapCol];
                 boolean isSpecialEmptyPos = (mapRow == size - 1 && mapCol == 1) || (mapRow == size && mapCol == 2) || (mapRow == 2 && mapCol == size) || (mapRow == 1 && mapCol == size - 1);
 
-                if (cellValue != WALL && cellValue != START && cellValue != END && !isSpecialEmptyPos) {
+                // Only allow asset placement on EMPTY (white) squares
+                if (cellValue == EMPTY && !isSpecialEmptyPos) {
                     positions.add(i * size + j);
                 }
             }
@@ -68,7 +72,7 @@ public class Map extends JPanel{
         if (size == 3) {
             assets = new int[] {1, 4, 5};
         } else {
-            assets = new int[] {1, 2, 3, 4, 5};
+            assets = new int[] {1, 2, 3, 4};
         }
         Random random = new Random();
 
@@ -147,27 +151,29 @@ public class Map extends JPanel{
 
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
-                BufferedImage assetImage = null;
-
-                switch (map[row][col]) {
-                    case 1:
-                        assetImage = windImage;
-                        break;
-                    case 2:
-                        assetImage = portal1Image;
-                        break;
-                    case 3:
-                        assetImage = portal2Image;
-                        break;
-                    case 4:
-                        assetImage = jinxBlockImage;
-                        break;
-                    case 5:
-                        assetImage = treeImage;
-                        break;
-                }
-                if (assetImage != null) {
-                    g.drawImage(assetImage, x + col * cellSize, y + row * cellSize, cellSize, cellSize, this);
+                if (mapGenerator[row + 1][col + 1] == WALL) {
+                    if (wallImage != null) {
+                        g.drawImage(wallImage, x + col * cellSize, y + row * cellSize, cellSize, cellSize, this);
+                    }
+                } else if (mapGenerator[row + 1][col + 1] == EMPTY) {
+                    BufferedImage assetImage = null;
+                    switch (map[row][col]) {
+                        case 1:
+                            assetImage = windImage;
+                            break;
+                        case 2:
+                            assetImage = portal1Image;
+                            break;
+                        case 3:
+                            assetImage = portal2Image;
+                            break;
+                        case 4:
+                            assetImage = jinxBlockImage;
+                            break;
+                    }
+                    if (assetImage != null) {
+                        g.drawImage(assetImage, x + col * cellSize, y + row * cellSize, cellSize, cellSize, this);
+                    }
                 }
                 for (int[] pos : starPathPositions) {
                     int rowStar = pos[0], colStar = pos[1];

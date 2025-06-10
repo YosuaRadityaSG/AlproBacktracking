@@ -83,9 +83,9 @@ public class Layar extends JPanel{
 
                         javax.swing.SwingUtilities.invokeLater(() -> {
                             if (found) {
-                                output.append("Time: " + time + " seconds.\n");
+                                // output.append("Time: " + time + " seconds.\n");
                             } else {
-                                output.append("No path exists.\n");
+                                // output.append("No path exists.\n");
                             }
                         });
                     } catch (InterruptedException e) {

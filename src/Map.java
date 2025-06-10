@@ -39,7 +39,7 @@ public class Map extends JPanel{
         }
         loadImage(size);
         mapGenerator = mapGenerator();
-        randomAssetsGenerator();
+        AssetsGenerator();
         repaint();
     }
 
@@ -52,7 +52,7 @@ public class Map extends JPanel{
         }
     }
 
-    private void randomAssetsGenerator(){
+    private void AssetsGenerator(){
         map = new int[size][size];
         List<Integer> positions = new ArrayList<>();
         
@@ -61,7 +61,6 @@ public class Map extends JPanel{
                 int mapRow = i + 1, mapCol = j + 1, cellValue = mapGenerator[mapRow][mapCol];
                 boolean isSpecialEmptyPos = (mapRow == size - 1 && mapCol == 1) || (mapRow == size && mapCol == 2) || (mapRow == 2 && mapCol == size) || (mapRow == 1 && mapCol == size - 1);
 
-                // Only allow asset placement on EMPTY (white) squares
                 if (cellValue == EMPTY && !isSpecialEmptyPos) {
                     positions.add(i * size + j);
                 }
@@ -70,11 +69,10 @@ public class Map extends JPanel{
         int[] assets;
 
         if (size == 3) {
-            assets = new int[] {1, 4, 5};
+            assets = new int[] {1, 4};
         } else {
             assets = new int[] {1, 2, 3, 4};
         }
-        Random random = new Random();
 
         for (int assetType : assets) {
             if(positions.size() == 0){
@@ -145,7 +143,7 @@ public class Map extends JPanel{
         
         g.drawImage(mapImage, x, y, this);
         if (map == null) {
-            randomAssetsGenerator();
+            AssetsGenerator();
         }
         int cellSize = mapImage.getWidth() / size;
 

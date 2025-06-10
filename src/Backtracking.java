@@ -72,12 +72,14 @@ public class Backtracking {
         }
         if (map[row][col] == Map.PORTAL1 || map[row][col] == Map.PORTAL2) {
             int targetPortal = (map[row][col] == Map.PORTAL1) ? Map.PORTAL2 : Map.PORTAL1;
+
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((i != row || j != col) && map[i][j] == targetPortal) {
-                        if (findPath(i, j)) return true;
-                        if (!pathStack.isEmpty()) pathStack.pop();
-                        return false;
+                        mapPanel.addStarPathPosition(row, col);
+                        pathStack.push(new int[]{row, col});
+                        ctr++;
+                        return findPath(i, j);
                     }
                 }
             }

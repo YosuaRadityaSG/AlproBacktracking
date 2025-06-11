@@ -15,7 +15,7 @@ public class Layar extends JPanel {
     private JTextArea output;
     private JScrollPane scrollPane, mapScrollPane, solutionMapScrollPane;
     private Map mapPanel, solutionMapPanel;
-    private JLabel backtrackingTimerLabel, solutionTimerLabel;
+    private JLabel backtrackingTimerLabel, solutionTimerLabel, caraTerlama, caraTercepat;
     private long startTime;
     private boolean timerRunning;
     private double jinxBlock = 0;
@@ -39,7 +39,6 @@ public class Layar extends JPanel {
 
         button.setBounds(10, 35, 150, 30);
         add(button);
-        
         skipButton = new JButton("Skip Animation");
         skipButton.setBounds(170, 35, 150, 30);
         skipButton.setEnabled(false);
@@ -47,13 +46,20 @@ public class Layar extends JPanel {
             skipRequested = true;
         });
         add(skipButton);
-        
+        caraTerlama = new JLabel("Cara Terlama");
+        caraTerlama.setBounds(250, 85, 150, 20);
+        add(caraTerlama);
+        caraTerlama.setVisible(false);
+        caraTercepat = new JLabel("Cara Tercepat");
+        caraTercepat.setBounds(850, 85, 150, 20);
+        add(caraTercepat);
+        caraTercepat.setVisible(false);
         backtrackingTimerLabel = new JLabel("");
-        backtrackingTimerLabel.setBounds(535, 70, 100, 40);
+        backtrackingTimerLabel.setBounds(400, 85, 100, 20);
         add(backtrackingTimerLabel);
         backtrackingTimerLabel.setVisible(false);
         solutionTimerLabel = new JLabel("");
-        solutionTimerLabel.setBounds(1145, 70, 100, 40);
+        solutionTimerLabel.setBounds(1000, 85, 100, 20);
         solutionTimerLabel.setVisible(false);
         add(solutionTimerLabel);
         output = new JTextArea();
@@ -121,6 +127,8 @@ public class Layar extends JPanel {
                 startTime = System.currentTimeMillis();
                 timerRunning = true;
                 jinxBlock = 0;
+                caraTerlama.setVisible(true);
+                caraTercepat.setVisible(false);
                 backtrackingTimerLabel.setText("");
                 backtrackingTimerLabel.setVisible(true);
                 solutionTimerLabel.setText("");
@@ -142,6 +150,7 @@ public class Layar extends JPanel {
                         SwingUtilities.invokeLater(() -> {
                             backtrackingTimerLabel.setText("Timer: " + String.format("%.2f", backtrackingTime) + "s");
                             solutionTimerLabel.setVisible(true);
+                            caraTerlama.setVisible(true);
                         });
                         Thread.sleep(500);
                         startTime = System.currentTimeMillis();
@@ -156,6 +165,7 @@ public class Layar extends JPanel {
                                     
                                     SwingUtilities.invokeLater(() -> {
                                         solutionTimerLabel.setText("Timer: " + String.format("%.2f", elapsedTime) + "s");
+                                        caraTercepat.setVisible(true);
                                     });
                                 }
                             } catch (InterruptedException e) {
@@ -172,6 +182,7 @@ public class Layar extends JPanel {
                         SwingUtilities.invokeLater(() -> {
                             solutionTimerLabel.setText("Timer: " + String.format("%.2f", solutionTime) + "s");
                             skipButton.setEnabled(false);
+                            caraTercepat.setVisible(true);
                         });
                         
                     } catch (InterruptedException e) {
@@ -207,12 +218,10 @@ public class Layar extends JPanel {
         }
     }
     
-    // Check if user requested to skip the animation
     public boolean isSkipRequested() {
         return skipRequested;
     }
     
-    // Reset the skip flag
     public void resetSkip() {
         skipRequested = false;
     }

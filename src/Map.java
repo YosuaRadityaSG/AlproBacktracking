@@ -51,6 +51,15 @@ public class Map extends JPanel {
         repaint();
     }
 
+    private void loadImage(int size) {
+        try {
+            mapImage = ImageIO.read(new File("Aplro/Asset/map_" + size + "x" + size + "_noborder.png"));
+        } catch (IOException e) {
+            System.out.println("Error loading image: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
     public void randomAssetsGenerator(){
         map = new int[size][size];
         List<Integer> positions = new ArrayList<>();

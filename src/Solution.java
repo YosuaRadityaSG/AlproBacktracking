@@ -6,7 +6,9 @@ public class Solution {
     private int[][] solution;
     private Map mapPanel;
     private BufferedImage starImage;
-    private int size, ctr;
+    private int size;
+    private int stepCount;
+    private int exploredCount;
     private static final int PATH = 8;
     private static final int[] ROW_MOVES = {-1, 0, 1, 0};
     private static final int[] COL_MOVES = {0, 1, 0, -1};
@@ -17,19 +19,22 @@ public class Solution {
     public Solution(Map mapPanel, BufferedImage starImage) {
         this.mapPanel = mapPanel;
         this.starImage = starImage;
+        this.stepCount = 0;
+        this.exploredCount = 0;
+        
         int[][] fullMap = mapPanel.getMapGenerator();
-
         this.size = fullMap.length - 2;
         this.map = new int[size][size];
         this.solution = new int[size][size];
+        
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 this.map[i][j] = fullMap[i + 1][j + 1];
                 this.solution[i][j] = fullMap[i + 1][j + 1];
             }
         }
-        int[][] internalMap = mapPanel.getInternalMap();
         
+        int[][] internalMap = mapPanel.getInternalMap();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (internalMap[i][j] == 2) {
@@ -80,6 +85,7 @@ public class Solution {
                 parent[i][j][1] = -1;
             }
         }
+        
         distance[startRow][startCol] = 0;
         boolean pathFound = false;
         
@@ -94,6 +100,7 @@ public class Solution {
             
             int minDist = Integer.MAX_VALUE, row = -1, col = -1;
             
+            // Find unvisited node with minimum distance
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if (!visited[i][j] && distance[i][j] < minDist) {
@@ -103,12 +110,17 @@ public class Solution {
                     }
                 }
             }
+            
             if (row == -1 || minDist == Integer.MAX_VALUE) {
                 break;
             }
+            
             visited[row][col] = true;
+            exploredCount++;
+            
             boolean isJinxBlock = isJinxBlock(row, col);
             
+            // Visualize start position
             if (row == startRow && col == startCol) {
                 mapPanel.addStarPathPosition(row, col);
                 mapPanel.repaint();
@@ -120,6 +132,8 @@ public class Solution {
                     }
                 }
             }
+            
+            // Check if we've reached the end
             if (map[row][col] == Map.END) {
                 pathFound = true;
                 if (skipped) {
@@ -130,13 +144,19 @@ public class Solution {
                 }
                 return true;
             }
+            
+            // Handle portals
             if (map[row][col] == Map.PORTAL1 || map[row][col] == Map.PORTAL2) {
                 handlePortal(row, col, distance, visited, parent);
                 continue;
             }
+            
+            // Skip wind cells
             if (map[row][col] == Map.ANGIN) {
                 continue;
             }
+            
+            // Explore all four directions
             for (int i = 0; i < 4; i++) {
                 int newRow = row + ROW_MOVES[i], newCol = col + COL_MOVES[i];
                 
@@ -150,11 +170,12 @@ public class Solution {
                 }
             }
         }
+        
         return false;
     }
     
     private boolean completeSolutionQuickly(int startRow, int startCol) {
-        // Use a simpler algorithm to quickly find the solution without animation
+        // Use BFS to quickly find the solution
         int[][] distance = new int[size][size];
         boolean[][] visited = new boolean[size][size];
         int[][][] parent = new int[size][size][2];
@@ -172,6 +193,7 @@ public class Solution {
         Queue<int[]> queue = new LinkedList<>();
         queue.add(new int[]{startRow, startCol});
         visited[startRow][startCol] = true;
+        exploredCount++;
         
         while (!queue.isEmpty()) {
             int[] current = queue.poll();
@@ -191,6 +213,7 @@ public class Solution {
                     for (int j = 0; j < size; j++) {
                         if ((i != row || j != col) && internalMap[i][j] == otherPortalValue && !visited[i][j]) {
                             visited[i][j] = true;
+                            exploredCount++;
                             distance[i][j] = distance[row][col] + 1;
                             parent[i][j][0] = row;
                             parent[i][j][1] = col;
@@ -210,6 +233,7 @@ public class Solution {
                 
                 if (isValid(newRow, newCol) && !visited[newRow][newCol]) {
                     visited[newRow][newCol] = true;
+                    exploredCount++;
                     distance[newRow][newCol] = distance[row][col] + 1;
                     parent[newRow][newCol][0] = row;
                     parent[newRow][newCol][1] = col;
@@ -224,11 +248,15 @@ public class Solution {
     private void displayFinalPath() {
         mapPanel.clearStarPathPositions();
         
+        // Count steps in final path
+        stepCount = 0;
+        
         // Reconstruct the path from the solution
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (solution[i][j] == PATH) {
                     mapPanel.addStarPathPosition(i, j);
+                    stepCount++;
                 }
             }
         }
@@ -259,7 +287,7 @@ public class Solution {
                         parent[i][j][1] = col;
                         
                         mapPanel.addStarPathPosition(i, j);
-                        ctr++;
+                        stepCount++;
                         mapPanel.repaint();
                         if (!skipped) {
                             delay(150);
@@ -281,6 +309,9 @@ public class Solution {
             int tempCol = current[1];
             current = new int[]{parent[tempRow][tempCol][0], parent[tempRow][tempCol][1]};
         }
+        
+        stepCount = path.size() - 1; // Exclude end point from step count
+        
         for (int i = path.size() - 1; i >= 0; i--) {
             int r = path.get(i)[0], c = path.get(i)[1];
             if (map[r][c] != Map.START && map[r][c] != Map.END) {
@@ -299,6 +330,9 @@ public class Solution {
             int tempCol = current[1];
             current = new int[]{parent[tempRow][tempCol][0], parent[tempRow][tempCol][1]};
         }
+        
+        stepCount = path.size() - 1; // Exclude end point from step count
+        
         reconstructPath(parent, endRow, endCol);
         for (int i = path.size() - 1; i >= 0; i--) {
             int r = path.get(i)[0], c = path.get(i)[1];
@@ -330,7 +364,11 @@ public class Solution {
     }
 
     public int getStepsCount() {
-        return ctr;
+        return stepCount;
+    }
+    
+    public int getExploredCount() {
+        return exploredCount;
     }
 
     public double getTime() {

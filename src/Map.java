@@ -1,4 +1,7 @@
+import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -8,7 +11,7 @@ import java.util.Random;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
-public class Map extends JPanel{
+public class Map extends JPanel {
     private int size;
     private BufferedImage mapImage, windImage, portal1Image, portal2Image, jinxBlockImage, starImage, wallImage;
     private int[][] map;
@@ -23,35 +26,34 @@ public class Map extends JPanel{
     public static final int PORTAL2 = 6;
     public static final int JINXBLOCK = 7;
     private List<int[]> starPathPositions = new ArrayList<>();
+    
+    // Dark theme colors
+    private Color startColor = new Color(76, 175, 80, 180); // Green
+    private Color endColor = new Color(244, 67, 54, 180); // Red
+    private Color emptyColor = new Color(30, 30, 30); // Dark gray for empty cells
+    private Color wallColor = new Color(60, 60, 60); // Slightly lighter gray for walls
+    private Color gridColor = new Color(80, 80, 80); // Grid lines
 
     public Map(int size, long seed) {
         this.size = size;
         this.random = new Random(seed);
         
-        try{
+        try {
             windImage = ImageIO.read(new File("Asset/Angin.png"));
             portal1Image = ImageIO.read(new File("Asset/Portal1.png"));
             portal2Image = ImageIO.read(new File("Asset/Portal2.png"));
             jinxBlockImage = ImageIO.read(new File("Asset/JinxBlock.png"));
             starImage = ImageIO.read(new File("Asset/Bintang.png"));
             wallImage = ImageIO.read(new File("Asset/Wall.png"));
-        }catch(IOException e){
+        } catch (IOException e) {
             System.out.println("Error loading images: " + e.getMessage());
             e.printStackTrace();
         }
-        loadImage(size);
+        
+        // Generate map directly instead of loading image
         mapGenerator = mapGenerator();
         randomAssetsGenerator();
         repaint();
-    }
-
-    private void loadImage(int size) {
-        try {
-            mapImage = ImageIO.read(new File("Asset/map_" + size + "x" + size + "_noborder.png"));
-        } catch (IOException e) {
-            System.out.println("Error loading image: " + e.getMessage());
-            e.printStackTrace();
-        }
     }
 
     public void randomAssetsGenerator(){
@@ -111,6 +113,103 @@ public class Map extends JPanel{
         return data;
     }
 
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        
+        Graphics2D g2d = (Graphics2D) g;
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        
+        int cellSize = Math.min(getWidth(), getHeight()) / (size + 2);
+        int x = (getWidth() - cellSize * (size + 2)) / 2;
+        int y = (getHeight() - cellSize * (size + 2)) / 2;
+        
+        // Draw the background
+        g2d.setColor(new Color(18, 18, 18));
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+        g2d.setColor(new Color(24, 24, 24));
+        g2d.fillRect(x, y, cellSize * (size + 2), cellSize * (size + 2));
+        
+        // Draw cells
+        for (int row = 0; row < size + 2; row++) {
+            for (int col = 0; col < size + 2; col++) {
+                int cellX = x + col * cellSize;
+                int cellY = y + row * cellSize;
+                
+                if (row == 0 || col == 0 || row == size + 1 || col == size + 1) {
+                    // Draw border wall
+                    g2d.setColor(wallColor);
+                    g2d.fillRect(cellX, cellY, cellSize, cellSize);
+                    continue;
+                }
+                
+                int mapValue = mapGenerator[row][col];
+                
+                if (mapValue == WALL) {
+                    // Draw wall
+                    if (wallImage != null) {
+                        g2d.drawImage(wallImage, cellX, cellY, cellSize, cellSize, this);
+                    } else {
+                        g2d.setColor(wallColor);
+                        g2d.fillRect(cellX, cellY, cellSize, cellSize);
+                    }
+                } else if (mapValue == START) {
+                    // Draw start
+                    g2d.setColor(startColor);
+                    g2d.fillRect(cellX, cellY, cellSize, cellSize);
+                    g2d.setColor(Color.WHITE);
+                    g2d.drawString("S", cellX + cellSize/2 - 4, cellY + cellSize/2 + 4);
+                } else if (mapValue == END) {
+                    // Draw end
+                    g2d.setColor(endColor);
+                    g2d.fillRect(cellX, cellY, cellSize, cellSize);
+                    g2d.setColor(Color.WHITE);
+                    g2d.drawString("E", cellX + cellSize/2 - 4, cellY + cellSize/2 + 4);
+                } else {
+                    // Draw empty cell
+                    g2d.setColor(emptyColor);
+                    g2d.fillRect(cellX, cellY, cellSize, cellSize);
+                    
+                    // Draw assets if present
+                    if (row - 1 >= 0 && col - 1 >= 0 && row - 1 < size && col - 1 < size) {
+                        BufferedImage assetImage = null;
+                        switch (map[row - 1][col - 1]) {
+                            case 1:
+                                assetImage = windImage;
+                                break;
+                            case 2:
+                                assetImage = portal1Image;
+                                break;
+                            case 3:
+                                assetImage = portal2Image;
+                                break;
+                            case 4:
+                                assetImage = jinxBlockImage;
+                                break;
+                        }
+                        if (assetImage != null) {
+                            g2d.drawImage(assetImage, cellX, cellY, cellSize, cellSize, this);
+                        }
+                    }
+                }
+                
+                // Draw grid lines for clarity
+                g2d.setColor(gridColor);
+                g2d.drawRect(cellX, cellY, cellSize, cellSize);
+            }
+        }
+        
+        // Draw path stars
+        for (int[] pos : starPathPositions) {
+            int rowStar = pos[0], colStar = pos[1];
+            int starX = x + (colStar + 1) * cellSize;
+            int starY = y + (rowStar + 1) * cellSize;
+            
+            g2d.drawImage(starImage, starX, starY, cellSize, cellSize, this);
+        }
+    }
+    
     public int[][] getMapGenerator() {
         return mapGenerator;
     }
@@ -154,52 +253,12 @@ public class Map extends JPanel{
         repaint();
     }
 
-    @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
-        if (mapImage == null) {
-            return;
-        }
-        int x = (getWidth() - mapImage.getWidth(this)) / 2, y = (getHeight() - mapImage.getHeight(this)) / 2;
-        
-        g.drawImage(mapImage, x, y, this);
-        if (map == null) {
-            randomAssetsGenerator();
-        }
-        int cellSize = mapImage.getWidth() / size;
-
-        for (int row = 0; row < size; row++) {
-            for (int col = 0; col < size; col++) {
-                if (mapGenerator[row + 1][col + 1] == WALL) {
-                    if (wallImage != null) {
-                        g.drawImage(wallImage, x + col * cellSize, y + row * cellSize, cellSize, cellSize, this);
-                    }
-                } else if (mapGenerator[row + 1][col + 1] == EMPTY) {
-                    BufferedImage assetImage = null;
-                    switch (map[row][col]) {
-                        case 1:
-                            assetImage = windImage;
-                            break;
-                        case 2:
-                            assetImage = portal1Image;
-                            break;
-                        case 3:
-                            assetImage = portal2Image;
-                            break;
-                        case 4:
-                            assetImage = jinxBlockImage;
-                            break;
-                    }
-                    if (assetImage != null) {
-                        g.drawImage(assetImage, x + col * cellSize, y + row * cellSize, cellSize, cellSize, this);
-                    }
-                }
-                for (int[] pos : starPathPositions) {
-                    int rowStar = pos[0], colStar = pos[1];
-
-                    g.drawImage(starImage, x + colStar * cellSize, y + rowStar * cellSize, cellSize, cellSize, this);
-                }
-            }
-        }
+    public int getPathStepCount() {
+        return starPathPositions.size();
+    }
+    
+    // Add this method for setting a custom title above the map
+    public void setMapTitle(String title) {
+        // Implementation could be added if needed
     }
 }

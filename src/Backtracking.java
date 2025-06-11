@@ -1,44 +1,55 @@
-import java.awt.image.BufferedImage;
-import java.lang.reflect.Field;
-import java.util.List;
-import java.util.Random;
-import java.util.Stack;
+// Mengimpor library yang diperlukan untuk program
+import java.awt.image.BufferedImage;  // Untuk mengelola gambar bintang sebagai penanda jalur
+import java.lang.reflect.Field;       // Untuk mengakses atribut private di kelas lain melalui reflection
+import java.util.List;                // Untuk menyimpan daftar posisi bintang pada jalur
+import java.util.Random;              // Untuk mengacak arah gerakan dalam mencari jalur
+import java.util.Stack;               // Untuk melacak jalur yang sudah dikunjungi dan backtracking
 
+/**
+ * Kelas Backtracking mengimplementasikan algoritma backtracking untuk mencari jalur
+ * dalam labirin dengan berbagai fitur khusus seperti portal, angin, dan jinxblock.
+ */
 public class Backtracking {
-    // Struktur data peta
-    private int[][] map;         // Struktur labirin
-    private int[][] solution;    // Jalur solusi
-    private Map mapPanel;        // Referensi ke panel visual
-    private BufferedImage starImage;  // Untuk visualisasi jalur
-    private int size, ctr;       // Ukuran labirin dan penghitung langkah
+    // Variabel untuk menyimpan data peta dan solusi
+    private int[][] map;         // Menyimpan struktur labirin (0=jalan, 1=dinding, dll)
+    private int[][] solution;    // Menyimpan jalur solusi yang ditemukan
+    private Map mapPanel;        // Referensi ke panel visual untuk menampilkan labirin
+    private BufferedImage starImage;  // Gambar bintang untuk visualisasi jalur
+    private int size, ctr;       // Ukuran labirin dan penghitung langkah solusi
     
-    // Konstanta dan array arah
-    private static final int PATH = 8;  // Nilai untuk menandai sel jalur
-    private static final int[] ROW_MOVES = {-1, 0, 1, 0}; // Atas, kanan, bawah, kiri (baris)
-    private static final int[] COL_MOVES = {0, 1, 0, -1}; // Atas, kanan, bawah, kiri (kolom)
+    // Mendefinisikan konstanta dan array untuk navigasi dalam labirin
+    private static final int PATH = 8;  // Nilai untuk menandai sel yang menjadi bagian jalur solusi
+    private static final int[] ROW_MOVES = {-1, 0, 1, 0}; // Pergeseran baris: Atas, kanan, bawah, kiri
+    private static final int[] COL_MOVES = {0, 1, 0, -1}; // Pergeseran kolom: Atas, kanan, bawah, kiri
     
-    // Pelacakan jalur dan pengacakan
-    private Stack<int[]> pathStack = new Stack<>();  // Stack untuk backtracking
-    private Random random = new Random();  // Untuk mengacak arah
+    // Variabel untuk pelacakan jalur dan pengacakan gerakan
+    private Stack<int[]> pathStack = new Stack<>();  // Stack untuk menyimpan jalur saat ini dan backtracking
+    private Random random = new Random();  // Objek untuk mengacak arah pencarian
 
-    // Konstruktor menginisialisasi pemecah dengan panel peta dan gambar bintang
+    /**
+     * Konstruktor untuk kelas Backtracking
+     * @param mapPanel Panel yang menampilkan labirin
+     * @param starImage Gambar bintang untuk visualisasi jalur
+     */
     public Backtracking(Map mapPanel, BufferedImage starImage) {
-        this.mapPanel = mapPanel;
-        this.starImage = starImage;
+        // Menyimpan referensi ke panel peta dan gambar bintang
+        this.mapPanel = mapPanel;  // Menyimpan referensi ke panel peta untuk visualisasi
+        this.starImage = starImage;  // Menyimpan gambar bintang untuk menandai jalur
         
-        // Mengekstrak data labirin dari panel peta
-        int[][] fullMap = mapPanel.getMapGenerator();
+        // Mengambil data labirin lengkap dari panel peta
+        int[][] fullMap = mapPanel.getMapGenerator();  // Mendapatkan data labirin dari panel Map
 
-        // Inisialisasi array peta internal (tidak termasuk batas)
-        this.size = fullMap.length - 2;
-        this.map = new int[size][size];
-        this.solution = new int[size][size];
+        // Menginisialisasi array peta dan solusi (tidak termasuk batas luar)
+        this.size = fullMap.length - 2;  // Ukuran peta internal (tanpa batas luar)
+        this.map = new int[size][size];  // Membuat array untuk menyimpan struktur labirin
+        this.solution = new int[size][size];  // Membuat array untuk menyimpan jalur solusi
         
-        // Salin sel labirin tidak termasuk batas
-        for (int i = 0; i < size; i++) {
-            for (int j = 0; j < size; j++) {
-                this.map[i][j] = fullMap[i + 1][j + 1];
-                this.solution[i][j] = fullMap[i + 1][j + 1];
+        // Menyalin data labirin dari fullMap ke map internal (menghilangkan batas)
+        for (int i = 0; i < size; i++) {  // Loop untuk setiap baris
+            for (int j = 0; j < size; j++) {  // Loop untuk setiap kolom
+                // Menyalin nilai sel dengan offset +1 untuk menghilangkan batas
+                this.map[i][j] = fullMap[i + 1][j + 1];  // Menyalin nilai sel ke map
+                this.solution[i][j] = fullMap[i + 1][j + 1];  // Menyalin nilai sel ke solution
             }
         }
         
@@ -259,8 +270,7 @@ public class Backtracking {
     // Periksa apakah sel saat ini adalah JinxBlock
     private boolean isJinxBlock(int row, int col) {
         int[][] internalMap = mapPanel.getInternalMap();
-        return row >= 0 && row < internalMap.length && 
-               col >= 0 && col < internalMap[0].length && 
+        return row >= 0 && row < internalMap.length && col >= 0 && col < internalMap[0].length && 
                internalMap[row][col] == 4;
     }
 

@@ -7,10 +7,7 @@ public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             try {
-                // Set system look and feel or custom look and feel
                 UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-                
-                // Customize UI components with dark theme
                 UIManager.put("Panel.background", new Color(18, 18, 18));
                 UIManager.put("Button.background", new Color(75, 95, 175));
                 UIManager.put("Button.foreground", Color.black);
@@ -20,12 +17,12 @@ public class App {
                 UIManager.put("ScrollPane.background", new Color(18, 18, 18));
                 UIManager.put("OptionPane.background", new Color(18, 18, 18));
                 UIManager.put("OptionPane.messageForeground", Color.BLACK);
+                JFrame frame = new JFrame("Maze Solver");
                 
-                JFrame frame = new JFrame("Dark Mode Maze Solver");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setSize(1200, 800);
                 frame.add(new Layar());
-                frame.setLocationRelativeTo(null); // Center on screen
+                frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
             } catch (Exception e) {
                 e.printStackTrace();

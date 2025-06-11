@@ -15,6 +15,8 @@ public class Backtracking {
     private static final int[] COL_MOVES = {0, 1, 0, -1};
     private Stack<int[]> pathStack = new Stack<>();
     private Random random = new Random();
+    private Layar layar;
+    private boolean skipped = false;
 
     public Backtracking(Map mapPanel, BufferedImage starImage) {
         this.mapPanel = mapPanel;
@@ -49,13 +51,17 @@ public class Backtracking {
         mapPanel.clearStarPathPositions();
     }
 
-    public boolean solveWithAnimation() {
+    public boolean solveWithAnimation(Layar layar) {
+        this.layar = layar;
         boolean result = false;
 
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (map[i][j] == Map.START) {
                     result = findPath(i, j);
+                    if (skipped) {
+                        displayFinalPath();
+                    }
                     break;
                 }
             }
@@ -63,7 +69,36 @@ public class Backtracking {
         return result;
     }
 
+    private void displayFinalPath() {
+        mapPanel.clearStarPathPositions();
+        
+        // Reconstruct the path from the solution
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (solution[i][j] == PATH) {
+                    mapPanel.addStarPathPosition(i, j);
+                }
+            }
+        }
+        
+        // Add start and end positions
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (map[i][j] == Map.START || map[i][j] == Map.END) {
+                    mapPanel.addStarPathPosition(i, j);
+                }
+            }
+        }
+        
+        mapPanel.repaint();
+    }
+
     private boolean findPath(int row, int col) {
+        if (layar != null && layar.isSkipRequested() && !skipped) {
+            skipped = true;
+            return false;
+        }
+        
         if (!isValid(row, col)) {
             return false;
         }
@@ -82,15 +117,24 @@ public class Backtracking {
         pathStack.push(new int[]{row, col});
         ctr++;
         mapPanel.repaint();
-        try {
-            if (isJinxBlock) {
-                Thread.sleep(2000);
-            } else {
-                Thread.sleep(150);
+        
+        if (!skipped) {
+            try {
+                if (isJinxBlock) {
+                    Thread.sleep(2000);
+                } else {
+                    Thread.sleep(150);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
+        
+        if (layar != null && layar.isSkipRequested()) {
+            skipped = true;
+            return false;
+        }
+        
         if (map[row][col] == Map.ANGIN) {
             removeLastNStarPositions(2);
             if (!pathStack.isEmpty()) pathStack.pop();
@@ -109,11 +153,20 @@ public class Backtracking {
                         solution[i][j] = PATH;
                         ctr++;
                         mapPanel.repaint();
-                        try {
-                            Thread.sleep(150);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
+                        
+                        if (!skipped) {
+                            try {
+                                Thread.sleep(150);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
                         }
+                        
+                        if (layar != null && layar.isSkipRequested()) {
+                            skipped = true;
+                            return false;
+                        }
+                        
                         int[] randomDirection = getRandomDirection();
 
                         for (int dir : randomDirection) {
@@ -122,6 +175,10 @@ public class Backtracking {
                             
                             if (findPath(newRow, newCol)) {
                                 return true;
+                            }
+                            
+                            if (skipped) {
+                                return false;
                             }
                         }
                         solution[i][j] = (map[i][j] == Map.PORTAL1) ? Map.PORTAL1 : Map.PORTAL2;
@@ -149,6 +206,10 @@ public class Backtracking {
             }
             if (!alreadyVisited && findPath(newRow, newCol)) {
                 return true;
+            }
+            
+            if (skipped) {
+                return false;
             }
         }
         if (map[row][col] != Map.START) {
@@ -206,8 +267,7 @@ public class Backtracking {
 
     private boolean isJinxBlock(int row, int col) {
         int[][] internalMap = mapPanel.getInternalMap();
-        return row >= 0 && row < internalMap.length && 
-               col >= 0 && col < internalMap[0].length && 
+        return row >= 0 && row < internalMap.length && col >= 0 && col < internalMap[0].length && 
                internalMap[row][col] == 4;
     }
 

@@ -19,6 +19,8 @@ public class Layar extends JPanel {
     private long startTime;
     private boolean timerRunning;
     private double jinxBlock = 0;
+    private JButton skipButton;
+    private volatile boolean skipRequested = false;
 
     public Layar() {
         setLayout(null);
@@ -37,6 +39,15 @@ public class Layar extends JPanel {
 
         button.setBounds(10, 35, 150, 30);
         add(button);
+        
+        skipButton = new JButton("Skip Animation");
+        skipButton.setBounds(170, 35, 150, 30);
+        skipButton.setEnabled(false);
+        skipButton.addActionListener(e -> {
+            skipRequested = true;
+        });
+        add(skipButton);
+        
         backtrackingTimerLabel = new JLabel("");
         backtrackingTimerLabel.setBounds(535, 70, 100, 40);
         add(backtrackingTimerLabel);
@@ -60,6 +71,7 @@ public class Layar extends JPanel {
         int size;
 
         output.setText("");
+        skipRequested = false;
         try {
             size = Integer.parseInt(sizeField.getText());
             if (size < 1 || size > 15) {
@@ -115,12 +127,14 @@ public class Layar extends JPanel {
                 solutionTimerLabel.setVisible(false);
                 startTimer();
                 
+                skipButton.setEnabled(true);
+                
                 new Thread(() -> {
                     try {
                         Thread.sleep(500);
                         startJinxBlockDetector();
                         Backtracking backtracking = new Backtracking(mapPanel, mapPanel.getStarImage());
-                        boolean backtrackingFound = backtracking.solveWithAnimation();
+                        boolean backtrackingFound = backtracking.solveWithAnimation(this);
                         
                         stopTimer();
                         double backtrackingTime = (System.currentTimeMillis() - startTime) / 1000.0 + jinxBlock;
@@ -133,6 +147,7 @@ public class Layar extends JPanel {
                         startTime = System.currentTimeMillis();
                         jinxBlock = 0;
                         timerRunning = true;
+                        skipRequested = false;
                         Thread timerThread = new Thread(() -> {
                             try {
                                 while (timerRunning) {
@@ -149,13 +164,14 @@ public class Layar extends JPanel {
                         });
                         timerThread.start();
                         Solution solution = new Solution(solutionMapPanel, solutionMapPanel.getStarImage());
-                        boolean solutionFound = solution.solveWithAnimation();
+                        boolean solutionFound = solution.solveWithAnimation(this);
                         
                         timerRunning = false;
                         double solutionTime = solution.getTime();
                         
                         SwingUtilities.invokeLater(() -> {
                             solutionTimerLabel.setText("Timer: " + String.format("%.2f", solutionTime) + "s");
+                            skipButton.setEnabled(false);
                         });
                         
                     } catch (InterruptedException e) {
@@ -189,6 +205,16 @@ public class Layar extends JPanel {
                 }
                 break;
         }
+    }
+    
+    // Check if user requested to skip the animation
+    public boolean isSkipRequested() {
+        return skipRequested;
+    }
+    
+    // Reset the skip flag
+    public void resetSkip() {
+        skipRequested = false;
     }
     
     private void startJinxBlockDetector() {

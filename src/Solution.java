@@ -2,19 +2,16 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 
 public class Solution {
-    // Field privat untuk data labirin, visualisasi, dan pelacakan algoritma
-    private int[][] map;            // Struktur labirin internal (tanpa batas)
-    private int[][] solution;       // Menyimpan jalur solusi
-    private Map mapPanel;           // Referensi ke panel visualisasi
-    private BufferedImage starImage; // Gambar untuk visualisasi jalur
-    private int size, ctr;          // Ukuran labirin dan penghitung langkah
-    private static final int PATH = 8; // Konstanta untuk menandai jalur solusi
-    // Array arah untuk pergerakan 4-arah (atas, kanan, bawah, kiri)
+    private int[][] map;
+    private int[][] solution;
+    private Map mapPanel;
+    private BufferedImage starImage;
+    private int size, ctr;
+    private static final int PATH = 8;
     private static final int[] ROW_MOVES = {-1, 0, 1, 0};
     private static final int[] COL_MOVES = {0, 1, 0, -1};
-    private long startTime, endTime; // Waktu eksekusi solusi
+    private long startTime, endTime;
 
-    // Konstruktor - menginisialisasi pencari solusi dengan peta dan sumber daya visualisasi
     public Solution(Map mapPanel, BufferedImage starImage) {
         this.mapPanel = mapPanel;
         this.starImage = starImage;
@@ -48,7 +45,6 @@ public class Solution {
         mapPanel.clearStarPathPositions();
     }
 
-    // Metode utama untuk menyelesaikan - memulai timer dan mencari jalur dari posisi AWAL
     public boolean solveWithAnimation() {
         this.startTime = System.currentTimeMillis();
         boolean result = false;
@@ -65,13 +61,9 @@ public class Solution {
         return result;
     }
 
-    // Algoritma pencari jalur inti - mengimplementasikan jalur terpendek Dijkstra dengan visualisasi
     private boolean findPath(int startRow, int startCol) {
-        // Menginisialisasi array jarak (jarak terpendek dari awal ke setiap sel)
         int[][] distance = new int[size][size];
-        // Menginisialisasi array yang dikunjungi (melacak sel mana yang telah diproses sepenuhnya)
         boolean[][] visited = new boolean[size][size];
-        // Menginisialisasi penunjuk induk (untuk merekonstruksi jalur nanti)
         int[][][] parent = new int[size][size][2];
         
         for (int i = 0; i < size; i++) {
@@ -81,11 +73,9 @@ public class Solution {
                 parent[i][j][1] = -1;
             }
         }
-        // Mengatur jarak ke posisi awal sebagai 0
         distance[startRow][startCol] = 0;
         boolean pathFound = false;
         
-        // Loop utama: selama jalur belum ditemukan, pilih sel yang belum dikunjungi dengan jarak minimum
         while (!pathFound) {
             int minDist = Integer.MAX_VALUE, row = -1, col = -1;
             
@@ -125,7 +115,6 @@ public class Solution {
             if (map[row][col] == Map.ANGIN) {
                 continue;
             }
-            // Proses sel yang dipilih: periksa apakah akhir telah dicapai, tangani elemen khusus, jelajahi tetangga
             for (int i = 0; i < 4; i++) {
                 int newRow = row + ROW_MOVES[i], newCol = col + COL_MOVES[i];
                 
@@ -142,14 +131,13 @@ public class Solution {
         return false;
     }
     
-    // Menangani teleportasi antara portal berpasangan
     private void handlePortal(int row, int col, int[][] distance, boolean[][] visited, int[][][] parent) {
-        // Mencari portal yang cocok di labirin
-        int portalValue = mapPanel.getInternalMap()[row][col], otherPortalValue = (portalValue == 2) ? 3 : 2;
+        int[][] internalMap = mapPanel.getInternalMap();
+        int portalValue = internalMap[row][col], otherPortalValue = (portalValue == 2) ? 3 : 2;
         
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if ((i != row || j != col) && mapPanel.getInternalMap()[i][j] == otherPortalValue && !visited[i][j]) {
+                if ((i != row || j != col) && internalMap[i][j] == otherPortalValue && !visited[i][j]) {
                     int newDist = distance[row][col] + 1;
                     if (newDist < distance[i][j]) {
                         distance[i][j] = newDist;
@@ -167,11 +155,8 @@ public class Solution {
         }
     }
     
-    // Membangun jalur solusi dari penunjuk induk (tanpa visualisasi)
     private void reconstructPath(int[][][] parent, int endRow, int endCol) {
-        // Membuat daftar untuk menyimpan sel jalur
         List<int[]> path = new ArrayList<>();
-        // Mulai dari posisi akhir dan ikuti penunjuk induk ke awal
         int[] current = {endRow, endCol};
         
         while (current[0] != -1 && current[1] != -1) {
@@ -180,7 +165,6 @@ public class Solution {
             int tempCol = current[1];
             current = new int[]{parent[tempRow][tempCol][0], parent[tempRow][tempCol][1]};
         }
-        // Tandai sel jalur di array solusi
         for (int i = path.size() - 1; i >= 0; i--) {
             int r = path.get(i)[0], c = path.get(i)[1];
             if (map[r][c] != Map.START && map[r][c] != Map.END) {
@@ -189,11 +173,8 @@ public class Solution {
         }
     }
     
-    // Membangun jalur solusi dan memvisualisasikannya dengan animasi
     private void reconstructPathWithVisualization(int[][][] parent, int endRow, int endCol) {
-        // Membuat daftar untuk menyimpan sel jalur
         List<int[]> path = new ArrayList<>();
-        // Mulai dari posisi akhir dan ikuti penunjuk induk ke awal
         int[] current = {endRow, endCol};
         
         while (current[0] != -1 && current[1] != -1) {
@@ -203,7 +184,6 @@ public class Solution {
             current = new int[]{parent[tempRow][tempCol][0], parent[tempRow][tempCol][1]};
         }
         reconstructPath(parent, endRow, endCol);
-        // Visualisasikan jalur dengan bintang bergerak dari awal ke akhir
         for (int i = path.size() - 1; i >= 0; i--) {
             int r = path.get(i)[0], c = path.get(i)[1];
             mapPanel.addStarPathPosition(r, c);
@@ -212,18 +192,14 @@ public class Solution {
         }
     }
     
-    // Memeriksa apakah posisi valid untuk digerakkan
     private boolean isValid(int row, int col) {
-        // Memeriksa batas dan dinding
         if (row < 0 || col < 0 || row >= size || col >= size) {
             return false;
         }
         return map[row][col] != Map.WALL;
     }
     
-    // Menjeda eksekusi untuk visualisasi
     private void delay(int ms) {
-        // Menjeda thread untuk milidetik yang ditentukan
         try {
             Thread.sleep(ms);
         } catch (InterruptedException e) {
@@ -231,7 +207,6 @@ public class Solution {
         }
     }
 
-    // Metode aksesor
     public int[][] getSolutionPath() {
         return solution;
     }
@@ -244,7 +219,6 @@ public class Solution {
         return (endTime - startTime) / 1000.0;
     }
 
-    // Memeriksa apakah posisi saat ini adalah JinxBlock (menambah penalti waktu)
     private boolean isJinxBlock(int row, int col) {
         int[][] internalMap = mapPanel.getInternalMap();
         return row >= 0 && row < internalMap.length && 

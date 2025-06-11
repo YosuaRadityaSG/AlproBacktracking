@@ -96,7 +96,7 @@ public class Map extends JPanel{
                 if (i == 0 || j == 0 || i == size + 1 || j == size + 1) {
                     data[i][j] = WALL;
                 } else {
-                    data[i][j] = (random.nextDouble() < 0.2) ? WALL : EMPTY;
+                    data[i][j] = (random.nextDouble() < 0.3) ? WALL : EMPTY;
                 }
             }
         }

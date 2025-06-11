@@ -29,12 +29,12 @@ public class Map extends JPanel{
         this.random = new Random(seed);
         
         try{
-            windImage = ImageIO.read(new File("Aplro/Asset/Angin.png"));
-            portal1Image = ImageIO.read(new File("Aplro/Asset/Portal1.png"));
-            portal2Image = ImageIO.read(new File("Aplro/Asset/Portal2.png"));
-            jinxBlockImage = ImageIO.read(new File("Aplro/Asset/JinxBlock.png"));
-            starImage = ImageIO.read(new File("Aplro/Asset/Bintang.png"));
-            wallImage = ImageIO.read(new File("Aplro/Asset/Wall.png"));
+            windImage = ImageIO.read(new File("Asset/Angin.png"));
+            portal1Image = ImageIO.read(new File("Asset/Portal1.png"));
+            portal2Image = ImageIO.read(new File("Asset/Portal2.png"));
+            jinxBlockImage = ImageIO.read(new File("Asset/JinxBlock.png"));
+            starImage = ImageIO.read(new File("Asset/Bintang.png"));
+            wallImage = ImageIO.read(new File("Asset/Wall.png"));
         }catch(IOException e){
             System.out.println("Error loading images: " + e.getMessage());
             e.printStackTrace();
@@ -47,7 +47,7 @@ public class Map extends JPanel{
 
     private void loadImage(int size) {
         try {
-            mapImage = ImageIO.read(new File("Aplro/Asset/map_" + size + "x" + size + "_noborder.png"));
+            mapImage = ImageIO.read(new File("Asset/map_" + size + "x" + size + "_noborder.png"));
         } catch (IOException e) {
             System.out.println("Error loading image: " + e.getMessage());
             e.printStackTrace();
@@ -115,7 +115,7 @@ public class Map extends JPanel{
         return mapGenerator;
     }
 
-     public BufferedImage getStarImage() {
+    public BufferedImage getStarImage() {
         return starImage;
     }
 

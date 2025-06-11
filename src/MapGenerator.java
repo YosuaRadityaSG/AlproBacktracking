@@ -1,9 +1,9 @@
 import java.util.Random;
 
 /**
- * MapGenerator is a class that generates a random maze of a given size.
- * The maze is represented as a 2D array of integers, where 0 represents an empty space,
- * 1 represents a wall, 2 represents the start position, and 3 represents the end position.
+ * MapGenerator adalah kelas yang menghasilkan labirin acak dengan ukuran tertentu.
+ * Labirin direpresentasikan sebagai array 2D integer, dimana 0 mewakili ruang kosong,
+ * 1 mewakili dinding, 2 mewakili posisi awal, dan 3 mewakili posisi akhir.
  */
 public class MapGenerator {
     private int size;
@@ -14,8 +14,8 @@ public class MapGenerator {
     public static final int END = 3;
     
     /**
-     * Constructs a MapGenerator with the specified size.
-     * @param size the size of the maze
+     * Membangun MapGenerator dengan ukuran yang ditentukan.
+     * @param size ukuran labirin
      */
     public MapGenerator(int size) {
         this.size = size;
@@ -23,17 +23,17 @@ public class MapGenerator {
     }
     
     /**
-     * Generates a random maze.
-     * @return a 2D array representing the maze
+     * Menghasilkan labirin acak.
+     * @return array 2D yang mewakili labirin
      */
     public int[][] generateMap() {
         int[][] map = new int[size+2][size+2];
         
-        // 1. Generates a maze of specified size with borders
-        // 2. Places walls randomly throughout the maze (30% probability)
-        // 3. Sets the start position at the bottom left
-        // 4. Sets the end position at the top right
-        // 5. Ensures paths around start and end positions are clear
+        // 1. Menghasilkan labirin dengan ukuran yang ditentukan dengan batas
+        // 2. Menempatkan dinding secara acak di seluruh labirin (30% probabilitas)
+        // 3. Mengatur posisi awal di kiri bawah
+        // 4. Mengatur posisi akhir di kanan atas
+        // 5. Memastikan jalur di sekitar posisi awal dan akhir bersih
         for (int i = 0; i < size+2; i++) {
             for (int j = 0; j < size+2; j++) {
                 if (i == 0 || j == 0 || i == size+1 || j == size+1) {

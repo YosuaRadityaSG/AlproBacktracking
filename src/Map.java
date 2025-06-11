@@ -9,13 +9,13 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 public class Map extends JPanel{
-    private int size;  // Maze dimensions
-    // Images for various maze elements
+    private int size;  // Dimensi labirin
+    // Gambar untuk berbagai elemen labirin
     private BufferedImage mapImage, windImage, portal1Image, portal2Image, jinxBlockImage, starImage, wallImage;
-    private int[][] map;  // Internal map for special elements
-    private int[][] mapGenerator;  // Base maze structure
+    private int[][] map;  // Peta internal untuk elemen khusus
+    private int[][] mapGenerator;  // Struktur labirin dasar
     private Random random = new Random();
-    // Constants for different cell types in the maze
+    // Konstanta untuk jenis sel yang berbeda dalam labirin
     public static final int EMPTY = 0;
     public static final int WALL = 1;
     public static final int START = 2;
@@ -24,14 +24,14 @@ public class Map extends JPanel{
     public static final int PORTAL1 = 5;
     public static final int PORTAL2 = 6;
     public static final int JINXBLOCK = 7;
-    private List<int[]> starPathPositions = new ArrayList<>();  // Star positions for visualization
+    private List<int[]> starPathPositions = new ArrayList<>();  // Posisi bintang untuk visualisasi
 
-    // Constructor initializes the map with a given size and random seed
+    // Konstruktor menginisialisasi peta dengan ukuran tertentu dan seed acak
     public Map(int size, long seed) {
         this.size = size;
         this.random = new Random(seed);
         
-        // Load all the image assets for the maze elements
+        // Memuat semua aset gambar untuk elemen labirin
         try{
             windImage = ImageIO.read(new File("Aplro/Asset/Angin.png"));
             portal1Image = ImageIO.read(new File("Aplro/Asset/Portal1.png"));
@@ -49,7 +49,7 @@ public class Map extends JPanel{
         repaint();
     }
 
-    // Loads the background map image based on size
+    // Memuat gambar peta latar belakang berdasarkan ukuran
     private void loadImage(int size) {
         try {
             mapImage = ImageIO.read(new File("Aplro/Asset/map_" + size + "x" + size + "_noborder.png"));
@@ -59,13 +59,13 @@ public class Map extends JPanel{
         }
     }
 
-    // Places special elements randomly in the maze
+    // Menempatkan elemen khusus secara acak dalam labirin
     public void randomAssetsGenerator(){
-        // Initialize internal map for special elements
+        // Menginisialisasi peta internal untuk elemen khusus
         map = new int[size][size];
         List<Integer> positions = new ArrayList<>();
         
-        // Collect valid positions for special elements (empty cells not near start/end)
+        // Mengumpulkan posisi yang valid untuk elemen khusus (sel kosong tidak dekat awal/akhir)
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 int mapRow = i + 1, mapCol = j + 1, cellValue = mapGenerator[mapRow][mapCol];
@@ -78,14 +78,14 @@ public class Map extends JPanel{
         }
         int[] assets;
         
-        // Choose which elements to place based on maze size
+        // Memilih elemen mana yang akan ditempatkan berdasarkan ukuran labirin
         if (size == 3) {
-            assets = new int[] {1, 4};  // Wind and JinxBlock for small mazes
+            assets = new int[] {1, 4};  // Angin dan JinxBlock untuk labirin kecil
         } else {
-            assets = new int[] {1, 2, 3, 4};  // All special elements for larger mazes
+            assets = new int[] {1, 2, 3, 4};  // Semua elemen khusus untuk labirin yang lebih besar
         }
 
-        // Place each special element at a random valid position
+        // Menempatkan setiap elemen khusus pada posisi acak yang valid
         for (int assetType : assets) {
             if (positions.isEmpty()) {
                 break;
@@ -98,11 +98,11 @@ public class Map extends JPanel{
         }
     }
 
-    // Generates the base maze structure with walls
+    // Menghasilkan struktur labirin dasar dengan dinding
     public int[][] mapGenerator(){
         int[][] data = new int[size + 2][size + 2];
 
-        // Create walls around the border
+        // Membuat dinding di sekitar batas
         for (int i = 0; i < size + 2; i++) {
             for (int j = 0; j < size + 2; j++) {
                 if (i == 0 || j == 0 || i == size + 1 || j == size + 1) {
@@ -112,11 +112,11 @@ public class Map extends JPanel{
                 }
             }
         }
-        // Set start and end positions
+        // Mengatur posisi awal dan akhir
         data[size][1] = START;
         data[1][size] = END;
         if (size > 1) {
-            // Ensure paths around start/end are clear
+            // Memastikan jalur di sekitar awal/akhir bersih
             data[size - 1][1] = EMPTY;
             data[size][2] = EMPTY;
             data[2][size] = EMPTY;
@@ -125,7 +125,7 @@ public class Map extends JPanel{
         return data;
     }
 
-    // Accessor methods for other classes
+    // Metode aksesor untuk kelas lain
     public int[][] getMapGenerator() {
         return mapGenerator;
     }
@@ -134,20 +134,20 @@ public class Map extends JPanel{
         return starImage;
     }
 
-    // Adds a star to visualize the current path
+    // Menambahkan bintang untuk memvisualisasikan jalur saat ini
     public void addStarPathPosition(int row, int col) {
-        // Check if position already has a star
+        // Memeriksa apakah posisi sudah memiliki bintang
         for (int[] pos : starPathPositions) {
             if (pos[0] == row && pos[1] == col) {
                 return;
             }
         }
-        // Add new position and trigger repaint
+        // Menambahkan posisi baru dan memicu repaint
         starPathPositions.add(new int[]{row, col});
         repaint();
     }
 
-    // Clears all star positions for fresh visualization
+    // Menghapus semua posisi bintang untuk visualisasi baru
     public void clearStarPathPositions() {
         starPathPositions.clear();
         repaint();
@@ -161,7 +161,7 @@ public class Map extends JPanel{
         return new ArrayList<>(starPathPositions);
     }
 
-    // Resets the path visualization
+    // Mengatur ulang visualisasi jalur
     public void clearPath() {
         getStarPathPositions().clear();
         for (int i = 0; i < map.length; i++) {
@@ -174,7 +174,7 @@ public class Map extends JPanel{
         repaint();
     }
 
-    // Renders the maze and all elements
+    // Menggambar labirin dan semua elemennya
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -182,22 +182,22 @@ public class Map extends JPanel{
             return;
         }
         
-        // Calculate position to center the maze
+        // Menghitung posisi untuk memusatkan labirin
         int x = (getWidth() - mapImage.getWidth(this)) / 2;
         int y = (getHeight() - mapImage.getHeight(this)) / 2;
         
-        // Draw base map image
+        // Menggambar gambar peta dasar
         g.drawImage(mapImage, x, y, this);
         
-        // Initialize map if needed
+        // Menginisialisasi peta jika diperlukan
         if (map == null) {
             randomAssetsGenerator();
         }
         
-        // Calculate cell size for proper scaling
+        // Menghitung ukuran sel untuk penskalaan yang tepat
         int cellSize = mapImage.getWidth() / size;
 
-        // Draw walls and special elements
+        // Menggambar dinding dan elemen khusus
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
                 if (mapGenerator[row + 1][col + 1] == WALL) {
@@ -224,7 +224,7 @@ public class Map extends JPanel{
                         g.drawImage(assetImage, x + col * cellSize, y + row * cellSize, cellSize, cellSize, this);
                     }
                 }
-                // Draw stars showing the path
+                // Menggambar bintang yang menunjukkan jalur
                 for (int[] pos : starPathPositions) {
                     int rowStar = pos[0], colStar = pos[1];
 
@@ -235,10 +235,10 @@ public class Map extends JPanel{
     }
 }
 
-// 1. Loads and manages maze images and special asset images
-// 2. Defines constants for maze elements (EMPTY, WALL, START, END, etc.)
-// 3. Generates the maze grid with border walls
-// 4. Randomly places special elements (wind, portals, jinx blocks)
-// 5. Tracks positions of path elements (stars) to visualize the solution
-// 6. Handles drawing of the maze and all elements on screen
-// 7. Provides methods for other classes to interact with the maze data
+// 1. Memuat dan mengelola gambar labirin dan gambar aset khusus
+// 2. Mendefinisikan konstanta untuk elemen labirin (EMPTY, WALL, START, END, dll.)
+// 3. Menghasilkan grid labirin dengan dinding batas
+// 4. Menempatkan elemen khusus secara acak (angin, portal, jinx block)
+// 5. Melacak posisi elemen jalur (bintang) untuk memvisualisasikan solusi
+// 6. Menangani penggambaran labirin dan semua elemen di layar
+// 7. Menyediakan metode agar kelas lain dapat berinteraksi dengan data labirin

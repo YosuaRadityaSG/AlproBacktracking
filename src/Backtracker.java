@@ -1,14 +1,14 @@
 public class Backtracker {
-    // Private fields for maze data and solution tracking
-    private int[][] map;         // Original maze structure
-    private int[][] solution;    // Solution path being built
-    private int size;            // Size of the maze
-    private static final int PATH = 4; // Constant for marking the path
-    // Direction arrays for 4-way movement (up, right, down, left)
+    // Field privat untuk data labirin dan pelacakan solusi
+    private int[][] map;         // Struktur labirin asli
+    private int[][] solution;    // Jalur solusi yang sedang dibangun
+    private int size;            // Ukuran labirin
+    private static final int PATH = 4; // Konstanta untuk menandai jalur
+    // Array arah untuk pergerakan 4-arah (atas, kanan, bawah, kiri)
     private static final int[] ROW_MOVES = {-1, 0, 1, 0};
     private static final int[] COL_MOVES = {0, 1, 0, -1};
     
-    // Constructor - copies maze data and initializes solution array
+    // Konstruktor - menyalin data labirin dan menginisialisasi array solusi
     public Backtracker(int[][] map) {
         this.map = map;
         this.size = map.length;
@@ -20,10 +20,10 @@ public class Backtracker {
         }
     }
     
-    // Main solving method - finds START position and initiates recursive search
+    // Metode penyelesaian utama - menemukan posisi AWAL dan memulai pencarian rekursif
     public boolean solve() {
-        // Find the starting position
-        // Begin depth-first search from start
+        // Temukan posisi awal
+        // Mulai pencarian depth-first dari awal
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (map[i][j] == MapGenerator.START) {
@@ -34,21 +34,21 @@ public class Backtracker {
         return false;
     }
     
-    // Recursive depth-first search with backtracking
+    // Pencarian depth-first rekursif dengan backtracking
     private boolean findPath(int row, int col) {
-        // Check if position is valid
+        // Periksa apakah posisi valid
         if (!isValid(row, col)) {
             return false;
         }
-        // Check if reached END position
+        // Periksa apakah mencapai posisi AKHIR
         if (map[row][col] == MapGenerator.END) {
             return true;
         }
-        // Mark current position as part of path
+        // Tandai posisi saat ini sebagai bagian dari jalur
         if (map[row][col] != MapGenerator.START) {
             solution[row][col] = PATH;
         }
-        // Try all four directions (up, right, down, left)
+        // Coba keempat arah (atas, kanan, bawah, kiri)
         for (int i = 0; i < 4; i++) {
             int newRow = row + ROW_MOVES[i], newCol = col + COL_MOVES[i];
 
@@ -56,27 +56,27 @@ public class Backtracker {
                 return true;
             }
         }
-        // If no solution found in any direction, backtrack by unmarking current position
+        // Jika tidak ada solusi ditemukan di arah mana pun, mundur dengan menandai posisi saat ini
         if (map[row][col] != MapGenerator.START) {
             solution[row][col] = MapGenerator.EMPTY;
         }
         return false;
     }
     
-    // Check if a position is valid to visit
+    // Periksa apakah posisi valid untuk dikunjungi
     private boolean isValid(int row, int col) {
-        // Check boundaries
+        // Periksa batas
         if (row < 0 || col < 0 || row >= size || col >= size) {
             return false;
         }
-        // Check for walls and already visited cells
+        // Periksa untuk dinding dan sel yang sudah dikunjungi
         if (map[row][col] == MapGenerator.WALL || solution[row][col] == PATH) {
             return false;
         }
         return true;
     }
     
-    // Return the solution path
+    // Mengembalikan jalur solusi
     public int[][] getSolutionPath() {
         return solution;
     }

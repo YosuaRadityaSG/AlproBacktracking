@@ -11,34 +11,34 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 public class Layar extends JPanel {
-    // UI components
-    private JTextField sizeField;          // For maze size input
-    private JTextArea output;              // Text output for small mazes
-    private JScrollPane scrollPane;        // Scrollable view for text output
-    private JScrollPane mapScrollPane;     // Scrollable view for backtracking visualization
-    private JScrollPane solutionMapScrollPane; // Scrollable view for solution algorithm
-    private Map mapPanel;                  // Visual panel for backtracking algorithm
-    private Map solutionMapPanel;          // Visual panel for solution algorithm
-    private JLabel backtrackingTimerLabel; // Display timer for backtracking
-    private JLabel solutionTimerLabel;     // Display timer for solution algorithm
+    // Komponen UI
+    private JTextField sizeField;          // Untuk input ukuran labirin
+    private JTextArea output;              // Output teks untuk labirin kecil
+    private JScrollPane scrollPane;        // Tampilan dapat digulir untuk output teks
+    private JScrollPane mapScrollPane;     // Tampilan dapat digulir untuk visualisasi backtracking
+    private JScrollPane solutionMapScrollPane; // Tampilan dapat digulir untuk algoritma solusi
+    private Map mapPanel;                  // Panel visual untuk algoritma backtracking
+    private Map solutionMapPanel;          // Panel visual untuk algoritma solusi
+    private JLabel backtrackingTimerLabel; // Menampilkan timer untuk backtracking
+    private JLabel solutionTimerLabel;     // Menampilkan timer untuk algoritma solusi
     
-    // Timer variables
-    private long startTime;                // Start time for performance measurement
-    private boolean timerRunning;          // Flag to control timer threads
-    private double jinxBlock = 0;          // Time penalty accumulator for JinxBlock
+    // Variabel timer
+    private long startTime;                // Waktu mulai untuk pengukuran kinerja
+    private boolean timerRunning;          // Flag untuk mengontrol thread timer
+    private double jinxBlock = 0;          // Akumulator penalti waktu untuk JinxBlock
 
-    // Constructor sets up the UI layout and components
+    // Konstruktor menyiapkan tata letak UI dan komponen
     public Layar() {
-        // Set up the panel with null layout
+        // Menyiapkan panel dengan layout null
         setLayout(null);
-        setBackground(new Color(173, 216, 230)); // Light blue background
+        setBackground(new Color(173, 216, 230)); // Latar belakang biru muda
         
-        // Initialize scroll panes as null
+        // Menginisialisasi scroll pane sebagai null
         mapScrollPane = null;
         solutionMapScrollPane = null;
         
-        // Create and position UI components
-        // 1. Label and text field for maze size input
+        // Membuat dan memposisikan komponen UI
+        // 1. Label dan field teks untuk input ukuran labirin
         JLabel label = new JLabel("Map size (1-15): ");
         label.setBounds(10, 0, 100, 40);
         label.setBackground(new Color(173, 216, 230));
@@ -48,12 +48,12 @@ public class Layar extends JPanel {
         sizeField.setBounds(105, 10, 30, 20);
         add(sizeField);
         
-        // 2. Button to trigger maze generation and solving
+        // 2. Tombol untuk memicu pembuatan labirin dan pemecahan
         JButton button = new JButton("Generate and Solve");
         button.setBounds(10, 35, 150, 30);
         add(button);
         
-        // 3. Timer labels for algorithm comparison
+        // 3. Label timer untuk perbandingan algoritma
         backtrackingTimerLabel = new JLabel("");
         backtrackingTimerLabel.setBounds(535, 70, 100, 40);
         add(backtrackingTimerLabel);
@@ -64,47 +64,47 @@ public class Layar extends JPanel {
         solutionTimerLabel.setVisible(false);
         add(solutionTimerLabel);
         
-        // 4. Text area for output display
+        // 4. Area teks untuk tampilan output
         output = new JTextArea();
         output.setEditable(false);
         output.setMargin(new Insets(0, 10, 0, 0));
         output.setBackground(new Color(173, 216, 230));
         
-        // 5. Scroll pane for text output
+        // 5. Scroll pane untuk output teks
         scrollPane = new JScrollPane(output);
         scrollPane.setBounds(0, 70, 1285, 1000);
         scrollPane.getViewport().setBackground(new Color(173, 216, 230));
         add(scrollPane);
         
-        // Add action listener to button
+        // Menambahkan action listener ke tombol
         button.addActionListener(e -> onGenerate());
     }
 
-    // Handler for maze generation and solving
+    // Handler untuk pembuatan labirin dan pemecahan
     private void onGenerate() {
-        // Validate user input for maze size
+        // Memvalidasi input pengguna untuk ukuran labirin
         int size;
         output.setText("");
         try {
             size = Integer.parseInt(sizeField.getText());
             if (size < 1 || size > 15) {
-                output.setText("Invalid size. Please enter a number between 1 and 15.\n");
+                output.setText("Ukuran tidak valid. Masukkan angka antara 1 dan 15.\n");
                 return;
             }
         } catch (NumberFormatException ex) {
-            output.setText("Please enter a valid integer.\n");
+            output.setText("Silakan masukkan bilangan bulat yang valid.\n");
             return;
         }
         
-        // Begin maze generation
-        output.append("Generating map...\n");
-        output.append("Map generated with borders:\n");
+        // Mulai pembuatan labirin
+        output.append("Membuat peta...\n");
+        output.append("Peta dibuat dengan batas:\n");
         
-        // Handle maze generation based on size
+        // Menangani pembuatan labirin berdasarkan ukuran
         switch (size) {
-            // For sizes 3-15, use visual comparison
+            // Untuk ukuran 3-15, gunakan perbandingan visual
             case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12: case 13: case 14: case 15:
-                // Clean up previous visualization if it exists
+                // Membersihkan visualisasi sebelumnya jika ada
                 if (mapPanel != null) {
                     mapPanel.clearPath();
                     mapPanel.repaint();
@@ -122,10 +122,10 @@ public class Layar extends JPanel {
                     solutionMapScrollPane = null;
                 }
                 
-                // Generate two identical mazes with the same seed
+                // Membuat dua labirin identik dengan seed yang sama
                 long seed = System.currentTimeMillis();
                 
-                // Setup left panel for backtracking visualization
+                // Menyiapkan panel kiri untuk visualisasi backtracking
                 mapPanel = new Map(size, seed);
                 int mapSize = size * 40;
                 mapPanel.setPreferredSize(new Dimension(mapSize, mapSize));
@@ -134,7 +134,7 @@ public class Layar extends JPanel {
                 mapScrollPane.setBounds(6, 105, 610, 610);
                 add(mapScrollPane);
                 
-                // Setup right panel for solution algorithm visualization
+                // Menyiapkan panel kanan untuk visualisasi algoritma solusi
                 solutionMapPanel = new Map(size, seed);
                 solutionMapPanel.setPreferredSize(new Dimension(mapSize, mapSize));
                 solutionMapPanel.setBackground(new Color(173, 216, 230));
@@ -142,7 +142,7 @@ public class Layar extends JPanel {
                 solutionMapScrollPane.setBounds(615, 105, 610, 610);
                 add(solutionMapScrollPane);
                 
-                // Initialize timer variables
+                // Menginisialisasi variabel timer
                 startTime = System.currentTimeMillis();
                 timerRunning = true;
                 jinxBlock = 0;
@@ -151,41 +151,41 @@ public class Layar extends JPanel {
                 solutionTimerLabel.setText("");
                 solutionTimerLabel.setVisible(false);
                 
-                // Start backtracking visualization timer
+                // Memulai timer visualisasi backtracking
                 startTimer();
                 
-                // Create a new thread for the algorithms to keep UI responsive
+                // Membuat thread baru untuk algoritma agar UI tetap responsif
                 new Thread(() -> {
                     try {
-                        // Brief delay before starting
+                        // Penundaan singkat sebelum memulai
                         Thread.sleep(500);
                         
-                        // Start JinxBlock detector to monitor time penalties
+                        // Mulai detektor JinxBlock untuk memantau penalti waktu
                         startJinxBlockDetector();
                         
-                        // Run backtracking algorithm on left panel
+                        // Menjalankan algoritma backtracking di panel kiri
                         Backtracking backtracking = new Backtracking(mapPanel, mapPanel.getStarImage());
                         boolean backtrackingFound = backtracking.solveWithAnimation();
                         
-                        // Stop timer and calculate total time
+                        // Menghentikan timer dan menghitung total waktu
                         stopTimer();
                         double backtrackingTime = (System.currentTimeMillis() - startTime) / 1000.0 + jinxBlock;
                         
-                        // Update UI with backtracking results
+                        // Memperbarui UI dengan hasil backtracking
                         SwingUtilities.invokeLater(() -> {
                             backtrackingTimerLabel.setText("Timer: " + String.format("%.2f", backtrackingTime) + "s");
                             solutionTimerLabel.setVisible(true);
                         });
                         
-                        // Brief delay before starting solution algorithm
+                        // Penundaan singkat sebelum memulai algoritma solusi
                         Thread.sleep(500);
                         
-                        // Reset timer for solution algorithm
+                        // Mengatur ulang timer untuk algoritma solusi
                         startTime = System.currentTimeMillis();
                         jinxBlock = 0;
                         timerRunning = true;
                         
-                        // Create timer thread for solution algorithm
+                        // Membuat thread timer untuk algoritma solusi
                         Thread timerThread = new Thread(() -> {
                             try {
                                 while (timerRunning) {
@@ -202,11 +202,11 @@ public class Layar extends JPanel {
                         });
                         timerThread.start();
                         
-                        // Run solution algorithm on right panel
+                        // Menjalankan algoritma solusi di panel kanan
                         Solution solution = new Solution(solutionMapPanel, solutionMapPanel.getStarImage());
                         boolean solutionFound = solution.solveWithAnimation();
                         
-                        // Stop timer and display final time
+                        // Menghentikan timer dan menampilkan waktu akhir
                         timerRunning = false;
                         double solutionTime = solution.getTime();
                         
@@ -220,62 +220,62 @@ public class Layar extends JPanel {
                 }).start();
                 break;
                 
-            // For smaller sizes, use text display
+            // Untuk ukuran yang lebih kecil, gunakan tampilan teks
             default:
                 backtrackingTimerLabel.setVisible(false);
                 if (scrollPane.getParent() == null) {
                     add(scrollPane);
                 }
                 
-                // Generate simple text-based maze
+                // Membuat labirin berbasis teks sederhana
                 MapGenerator mapGenerator = new MapGenerator(size);
                 int[][] map = mapGenerator.generateMap();
 
-                // Display the initial maze
-                output.append("□ = Empty, ■ = Wall, S = Start, E = End\n");
+                // Menampilkan labirin awal
+                output.append("□ = Kosong, ■ = Dinding, S = Awal, E = Akhir\n");
                 output.append(printMap(map));
                 
-                // Run backtracking algorithm
-                output.append("Applying backtracking...\n");
+                // Menjalankan algoritma backtracking
+                output.append("Menerapkan backtracking...\n");
                 startTime = System.currentTimeMillis();
                 Backtracker backtracker = new Backtracker(map);
                 boolean solutionFound = backtracker.solve();
                 double solveTime = (System.currentTimeMillis() - startTime) / 1000.0;
 
-                // Display solution or failure message
+                // Menampilkan solusi atau pesan kegagalan
                 if (solutionFound) {
-                    output.append("□ = Empty, ■ = Wall, S = Start, E = End, × = Path\n");
+                    output.append("□ = Kosong, ■ = Dinding, S = Awal, E = Akhir, × = Jalur\n");
                     output.append(printMap(backtracker.getSolutionPath()));
                 } else {
-                    output.append("No solution exists.\n");
+                    output.append("Tidak ada solusi yang ada.\n");
                     output.append(printMap(map));
                 }
                 break;
         }
     }
     
-    // Monitors for JinxBlock encounters and adds time penalties
+    // Memantau untuk pertemuan JinxBlock dan menambahkan penalti waktu
     private void startJinxBlockDetector() {
         new Thread(() -> {
             try {
                 int lastPathSize = 0;
                 
-                // While the timer is running, check for JinxBlock encounters
+                // Saat timer berjalan, periksa pertemuan JinxBlock
                 while (timerRunning) {
                     Thread.sleep(100);
                     if (mapPanel != null) {
                         List<int[]> path = mapPanel.getStarPathPositions();
                         
-                        // Check if new position has been added to path
+                        // Periksa apakah posisi baru telah ditambahkan ke jalur
                         if (path.size() > lastPathSize && path.size() > 0) {
                             int[] pos = path.get(path.size() - 1);
                             int[][] internalMap = mapPanel.getInternalMap();
                             
-                            // Check if new position is a JinxBlock
+                            // Periksa apakah posisi baru adalah JinxBlock
                             if (pos[0] >= 0 && pos[0] < internalMap.length && 
                                 pos[1] >= 0 && pos[1] < internalMap[0].length &&
                                 internalMap[pos[0]][pos[1]] == 4) {
-                                // Add 4-second penalty and pause for 2 seconds
+                                // Tambahkan penalti 4 detik dan jeda selama 2 detik
                                 jinxBlock += 4.0;
                                 Thread.sleep(2000);
                             }
@@ -289,12 +289,12 @@ public class Layar extends JPanel {
         }).start();
     }
     
-    // Stops the timer
+    // Menghentikan timer
     private void stopTimer() {
         timerRunning = false;
     }
 
-    // Starts a timer thread to update timer label
+    // Memulai thread timer untuk memperbarui label timer
     private void startTimer() {
         new Thread(() -> {
             while (timerRunning) {
@@ -312,12 +312,12 @@ public class Layar extends JPanel {
         }).start();
     }
 
-    // Converts maze array to pretty-printed text representation
+    // Mengkonversi array labirin ke representasi teks yang rapi
     private String printMap(int[][] map) {
         String[] symbols = {"□ ", "■ ", "S ", "E ", "× "};
         StringBuilder stringBuilder = new StringBuilder();
 
-        // For each cell, append appropriate symbol
+        // Untuk setiap sel, tambahkan simbol yang sesuai
         for (int[] row : map) {
             for (int value : row) {
                 if (value >= 0 && value < symbols.length) {
@@ -332,12 +332,12 @@ public class Layar extends JPanel {
     }
 }
 
-// 1. Creates UI components (text fields, buttons, panels, labels)
-// 2. Handles user input for maze size (1-15)
-// 3. Generates maze based on user input
-// 4. Displays two maze panels side by side:
-//    - Left panel: Backtracking algorithm visualization
-//    - Right panel: Solution algorithm visualization
-// 5. Tracks and displays solving time for both algorithms
-// 6. Manages special game elements like JinxBlock that adds time penalties
-// 7. Coordinates the maze solving process on separate threads
+// 1. Membuat komponen UI (field teks, tombol, panel, label)
+// 2. Menangani input pengguna untuk ukuran labirin (1-15)
+// 3. Menghasilkan labirin berdasarkan input pengguna
+// 4. Menampilkan dua panel labirin berdampingan:
+//    - Panel kiri: Visualisasi algoritma backtracking
+//    - Panel kanan: Visualisasi algoritma solusi
+// 5. Melacak dan menampilkan waktu penyelesaian untuk kedua algoritma
+// 6. Mengelola elemen game khusus seperti JinxBlock yang menambahkan penalti waktu
+// 7. Mengkoordinasikan proses pemecahan labirin di thread terpisah

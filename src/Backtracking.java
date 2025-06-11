@@ -5,36 +5,36 @@ import java.util.Random;
 import java.util.Stack;
 
 public class Backtracking {
-    // Map data structures
-    private int[][] map;         // The maze structure
-    private int[][] solution;    // The solution path
-    private Map mapPanel;        // Reference to visual panel
-    private BufferedImage starImage;  // For path visualization
-    private int size, ctr;       // Size of maze and step counter
+    // Struktur data peta
+    private int[][] map;         // Struktur labirin
+    private int[][] solution;    // Jalur solusi
+    private Map mapPanel;        // Referensi ke panel visual
+    private BufferedImage starImage;  // Untuk visualisasi jalur
+    private int size, ctr;       // Ukuran labirin dan penghitung langkah
     
-    // Constants and direction arrays
-    private static final int PATH = 8;  // Value to mark path cells
-    private static final int[] ROW_MOVES = {-1, 0, 1, 0}; // Up, right, down, left (row)
-    private static final int[] COL_MOVES = {0, 1, 0, -1}; // Up, right, down, left (column)
+    // Konstanta dan array arah
+    private static final int PATH = 8;  // Nilai untuk menandai sel jalur
+    private static final int[] ROW_MOVES = {-1, 0, 1, 0}; // Atas, kanan, bawah, kiri (baris)
+    private static final int[] COL_MOVES = {0, 1, 0, -1}; // Atas, kanan, bawah, kiri (kolom)
     
-    // Path tracking and randomization
-    private Stack<int[]> pathStack = new Stack<>();  // Stack for backtracking
-    private Random random = new Random();  // For randomizing direction
+    // Pelacakan jalur dan pengacakan
+    private Stack<int[]> pathStack = new Stack<>();  // Stack untuk backtracking
+    private Random random = new Random();  // Untuk mengacak arah
 
-    // Constructor initializes the solver with map panel and star image
+    // Konstruktor menginisialisasi pemecah dengan panel peta dan gambar bintang
     public Backtracking(Map mapPanel, BufferedImage starImage) {
         this.mapPanel = mapPanel;
         this.starImage = starImage;
         
-        // Extract maze data from the map panel
+        // Mengekstrak data labirin dari panel peta
         int[][] fullMap = mapPanel.getMapGenerator();
 
-        // Initialize internal map array (excluding border)
+        // Inisialisasi array peta internal (tidak termasuk batas)
         this.size = fullMap.length - 2;
         this.map = new int[size][size];
         this.solution = new int[size][size];
         
-        // Copy maze cells excluding the border
+        // Salin sel labirin tidak termasuk batas
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 this.map[i][j] = fullMap[i + 1][j + 1];
@@ -42,7 +42,7 @@ public class Backtracking {
             }
         }
         
-        // Mark special elements in the map
+        // Tandai elemen khusus dalam peta
         int[][] internalMap = mapPanel.getInternalMap();
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
@@ -59,15 +59,15 @@ public class Backtracking {
             }
         }
         
-        // Clear any existing path visualization
+        // Bersihkan visualisasi jalur yang ada
         mapPanel.clearStarPathPositions();
     }
 
-    // Main solving method that starts from the start position
+    // Metode penyelesaian utama yang dimulai dari posisi awal
     public boolean solveWithAnimation() {
         boolean result = false;
 
-        // Find start position and begin recursive search
+        // Temukan posisi awal dan mulai pencarian rekursif
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
                 if (map[i][j] == Map.START) {
@@ -79,17 +79,17 @@ public class Backtracking {
         return result;
     }
 
-    // Recursive depth-first search with backtracking
+    // Pencarian depth-first rekursif dengan backtracking
     private boolean findPath(int row, int col) {
-        // Check if current position is valid
+        // Periksa apakah posisi saat ini valid
         if (!isValid(row, col)) {
             return false;
         }
         
-        // Check for special JinxBlock that adds time penalty
+        // Periksa JinxBlock khusus yang menambahkan penalti waktu
         boolean isJinxBlock = isJinxBlock(row, col);
         
-        // Check if we reached the end
+        // Periksa apakah kita mencapai akhir
         if (map[row][col] == Map.END) {
             mapPanel.addStarPathPosition(row, col);
             pathStack.push(new int[]{row, col});
@@ -97,18 +97,18 @@ public class Backtracking {
             return true;
         }
         
-        // Mark current cell as part of path
+        // Tandai sel saat ini sebagai bagian dari jalur
         if (map[row][col] != Map.START) {
             solution[row][col] = PATH;
         }
         
-        // Visualize current position in path
+        // Visualisasikan posisi saat ini dalam jalur
         mapPanel.addStarPathPosition(row, col);
         pathStack.push(new int[]{row, col});
         ctr++;
         mapPanel.repaint();
         
-        // Add delay for visualization (longer for JinxBlock)
+        // Tambahkan penundaan untuk visualisasi (lebih lama untuk JinxBlock)
         try {
             if (isJinxBlock) {
                 Thread.sleep(2000);
@@ -119,7 +119,7 @@ public class Backtracking {
             e.printStackTrace();
         }
         
-        // Handle wind element which pushes back
+        // Tangani elemen angin yang mendorong kembali
         if (map[row][col] == Map.ANGIN) {
             removeLastNStarPositions(2);
             if (!pathStack.isEmpty()) pathStack.pop();
@@ -127,16 +127,16 @@ public class Backtracking {
             return false;
         }
         
-        // Handle portal teleportation
+        // Tangani teleportasi portal
         if (map[row][col] == Map.PORTAL1 || map[row][col] == Map.PORTAL2) {
             int[][] internalMap = mapPanel.getInternalMap();
             int otherPortalValue = (internalMap[row][col] == 2) ? 3 : 2;
         
-            // Find other portal
+            // Temukan portal lainnya
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
                     if ((i != row || j != col) && internalMap[i][j] == otherPortalValue) {
-                        // Teleport to the other portal
+                        // Teleport ke portal lainnya
                         mapPanel.addStarPathPosition(i, j);
                         pathStack.push(new int[]{i, j});
                         solution[i][j] = PATH;
@@ -148,7 +148,7 @@ public class Backtracking {
                             e.printStackTrace();
                         }
                         
-                        // Try all directions from new portal position
+                        // Coba semua arah dari posisi portal baru
                         int[] randomDirection = getRandomDirection();
                         for (int dir : randomDirection) {
                             int newRow = i + ROW_MOVES[dir];
@@ -159,7 +159,7 @@ public class Backtracking {
                             }
                         }
                         
-                        // If no path found from teleport destination, backtrack
+                        // Jika tidak ada jalur ditemukan dari tujuan teleport, mundur
                         solution[i][j] = (map[i][j] == Map.PORTAL1) ? Map.PORTAL1 : Map.PORTAL2;
                         if (!pathStack.isEmpty()) {
                             pathStack.pop();
@@ -172,12 +172,12 @@ public class Backtracking {
             }
         }
         
-        // Try all four directions in random order
+        // Coba keempat arah dalam urutan acak
         int[] randomDirections = getRandomDirection();
         for (int dir : randomDirections) {
             int newRow = row + ROW_MOVES[dir], newCol = col + COL_MOVES[dir];
             
-            // Check if position is already in current path
+            // Periksa apakah posisi sudah ada di jalur saat ini
             boolean alreadyVisited = false;
             for (int[] pos : pathStack) {
                 if (pos[0] == newRow && pos[1] == newCol) {
@@ -186,13 +186,13 @@ public class Backtracking {
                 }
             }
             
-            // If not visited and path found, return success
+            // Jika belum dikunjungi dan jalur ditemukan, kembalikan sukses
             if (!alreadyVisited && findPath(newRow, newCol)) {
                 return true;
             }
         }
         
-        // If no path found in any direction, backtrack
+        // Jika tidak ada jalur ditemukan di arah mana pun, mundur
         if (map[row][col] != Map.START) {
             solution[row][col] = map[row][col];
         }
@@ -204,11 +204,11 @@ public class Backtracking {
         return false;
     }
     
-    // Randomize direction order for variety
+    // Mengacak urutan arah untuk variasi
     private int[] getRandomDirection() {
-        int[] directions = {0, 1, 2, 3};  // Up, right, down, left
+        int[] directions = {0, 1, 2, 3};  // Atas, kanan, bawah, kiri
         
-        // Fisher-Yates shuffle
+        // Pengacakan Fisher-Yates
         for (int i = directions.length - 1; i > 0; i--) {
             int j = random.nextInt(i + 1), temp = directions[i];
 
@@ -218,17 +218,17 @@ public class Backtracking {
         return directions;
     }
     
-    // Remove stars from visualization when backtracking
+    // Menghapus bintang dari visualisasi saat backtracking
     private void removeLastNStarPositions(int n) {
         try {
-            // Use reflection to access private field in Map class
+            // Gunakan refleksi untuk mengakses field private di kelas Map
             Field field = mapPanel.getClass().getDeclaredField("starPathPositions");
 
             field.setAccessible(true);
             @SuppressWarnings("unchecked")
             List<int[]> starPathPositions = (List<int[]>) field.get(mapPanel);
             
-            // Remove the last n stars
+            // Hapus n bintang terakhir
             for (int i = 0; i < n && !starPathPositions.isEmpty(); i++) {
                 starPathPositions.remove(starPathPositions.size() - 1);
             }
@@ -237,17 +237,17 @@ public class Backtracking {
         }
     }
 
-    // Check if a position is valid to move to
+    // Periksa apakah posisi valid untuk digerakkan
     private boolean isValid(int row, int col) {
-        // Check bounds
+        // Periksa batas
         if (row < 0 || col < 0 || row >= size || col >= size) {
             return false;
         }
-        // Check for wall
+        // Periksa untuk dinding
         if (map[row][col] == Map.WALL) {
             return false;
         }
-        // Check for already visited cell (except endpoint)
+        // Periksa untuk sel yang sudah dikunjungi (kecuali titik akhir)
         for (int[] pos : pathStack) {
             if (pos[0] == row && pos[1] == col && !(map[row][col] == Map.END)) {
                 return false;
@@ -256,7 +256,7 @@ public class Backtracking {
         return true;
     }
 
-    // Check if current cell is a JinxBlock
+    // Periksa apakah sel saat ini adalah JinxBlock
     private boolean isJinxBlock(int row, int col) {
         int[][] internalMap = mapPanel.getInternalMap();
         return row >= 0 && row < internalMap.length && 
@@ -264,7 +264,7 @@ public class Backtracking {
                internalMap[row][col] == 4;
     }
 
-    // Accessor methods
+    // Metode aksesor
     public int[][] getSolutionPath() {
         return solution;
     }
@@ -274,12 +274,12 @@ public class Backtracking {
     }
 }
 
-// 1. Uses a stack to keep track of the current path
-// 2. Explores possible paths with randomized direction selection
-// 3. Handles special maze elements:
-//    - Portals: teleports to another location
-//    - Wind: pushes back from the path
-//    - JinxBlock: adds time penalty
-// 4. Visualizes the search process by adding star images
-// 5. Implements backtracking when reaching dead ends
-// 6. Returns true when finding the end point
+// 1. Menggunakan stack untuk melacak jalur saat ini
+// 2. Menjelajahi jalur yang mungkin dengan pemilihan arah acak
+// 3. Menangani elemen labirin khusus:
+//    - Portal: teleport ke lokasi lain
+//    - Angin: mendorong kembali dari jalur
+//    - JinxBlock: menambahkan penalti waktu
+// 4. Memvisualisasikan proses pencarian dengan menambahkan gambar bintang
+// 5. Mengimplementasikan backtracking saat mencapai jalan buntu
+// 6. Mengembalikan true saat menemukan titik akhir
